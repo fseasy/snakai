@@ -20,6 +20,11 @@ JaveScript作为最近非常火的语言，很不幸，我已经基本忘光了�
 
 1. 绘制贪吃蛇（控制台） [DOING]
 
+    首先是从[Snake game implementation with design patterns](http://www.slideshare.net/justinbrottes/snake-ppt-web-release) 中的类图中学习贪吃蛇的设计；
+
+    其次[查到](http://stackoverflow.com/questions/5006821/nodejs-how-to-read-keystrokes-from-stdin)使用[keypress](https://github.com/TooTallNate/keypress)
+
+
 2. 基于规则的AI [TODO]
 
 3. 基于强化学习的AI [TODO]
