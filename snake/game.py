@@ -1,0 +1,130 @@
+# -*- coding: utf-8 -*-
+"""snake game.
+guided by https://gist.github.com/sanchitgangwar/2158089
+"""
+
+import contextlib
+import curses
+import logging
+import random
+
+class Snake(object):
+    """snake game based on curses
+    """
+
+    def __init__(self):
+        """
+        """
+        with self._curse_env() as _:
+            self._loop()
+
+    def _loop(self):
+        win = curses.newwin(20, 60, 0, 0)
+        win.keypad(1)
+        win.border(0)
+        win.nodelay(1)
+
+        key = curses.KEY_RIGHT
+        score = 0
+
+        # Initial snake co-ordinates
+        snake = [[4, 10], [4, 9], [4, 8]]
+        # First food co-ordinates
+        food = [10, 20]
+
+        # Prints the food
+        win.addch(food[0], food[1], '*')
+        # While Esc key is not pressed
+        while key != 27:                                              
+            win.border(0)
+            # Printing 'Score' and
+            win.addstr(0, 2, 'Score : ' + str(score) + ' ')
+            # 'SNAKE' strings
+            win.addstr(0, 27, ' SNAKE ')
+            # Increases the speed of Snake as its length increases
+            win.timeout(150 - (len(snake)/5 + len(snake)/10) % 120)
+
+            # Previous key pressed
+            prevKey = key
+            event = win.getch()
+            key = key if event == -1 else event
+
+            # If SPACE BAR is pressed, wait for another
+            if key == ord(' '):
+                # one (Pause/Resume)
+                key = -1
+                while key != ord(' '):
+                    key = win.getch()
+                key = prevKey
+                continue
+
+            # If an invalid key is pressed
+            if key not in [curses.KEY_LEFT, curses.KEY_RIGHT, curses.KEY_UP, curses.KEY_DOWN, 27]:
+                key = prevKey
+
+            # Calculates the new coordinates of the head of the snake. NOTE: len(snake) increases.
+            # This is taken care of later at [1].
+            snake.insert(0, [snake[0][0] + (key == curses.KEY_DOWN and 1) + (key == curses.KEY_UP and -1),
+                             snake[0][1] + (key == curses.KEY_LEFT and -1) + (key == curses.KEY_RIGHT and 1)])
+
+            # If snake crosses the boundaries, make it enter from the other side
+            if snake[0][0] == 0:
+                snake[0][0] = 18
+            if snake[0][1] == 0:
+                snake[0][1] = 58
+            if snake[0][0] == 19:
+                snake[0][0] = 1
+            if snake[0][1] == 59:
+                snake[0][1] = 1
+
+            # Exit if snake crosses the boundaries (Uncomment to enable)
+            # if snake[0][0] == 0 or snake[0][0] == 19 or snake[0][1] == 0 or snake[0][1] == 59: break
+
+            # If snake runs over itself
+            if snake[0] in snake[1:]:
+                break
+
+            # When snake eats the food
+            if snake[0] == food:
+                food = []
+                score += 1
+                while food == []:
+                    # Calculating next food's coordinates
+                    food = [random.randint(1, 18), random.randint(1, 58)]
+                    if food in snake:
+                        food = []
+                win.addch(food[0], food[1], '*')
+            else:
+                # [1] If it does not eat the food, length decreases
+                last = snake.pop()
+                win.addch(last[0], last[1], ' ')
+            win.addch(snake[0][0], snake[0][1], '#')
+        print("\nScore - " + str(score))
+
+    @contextlib.contextmanager
+    def _curse_env(self):
+        stdcsr = curses.initscr()
+        stdcsr.keypad(1)
+        curses.noecho()
+        curses.curs_set(0)
+        try:
+            yield stdcsr
+        except:
+            raise
+        finally:
+            # release, or it will break the terminal
+            stdcsr.keypad(0)
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
+
+
+def main():
+    """main program
+    """
+    logging.basicConfig(level=logging.INFO)
+    Snake()
+
+
+if __name__ == "__main__":
+    main()
