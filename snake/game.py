@@ -8,13 +8,55 @@ import curses
 import logging
 import random
 
-class Snake(object):
-    """snake game based on curses
+
+class SnakeStateMachine(object):
+    """snake-state-machine
+    only keep inner status, the IO logic should be impl in the other class. 
     """
+    class Direction(object):
+        """direction"""
+        LEFT = 0
+        RIGHT = 1
+        UP = 2
+        DOWN = 3
+        UNDEFINED = 4
+
+
+    class InnerStatus(object):
+        """inner status"""
+        RUNNING = 0
+        END = 1
+
 
     def __init__(self):
+        """init 
         """
-        """
+        self.window_height = 20
+        self.window_width = 60
+        self.snake = None
+        self.food = None
+        self.score = 0
+        self.direction = self.Direction.UNDEFINED
+        self.status = self.InnerStatus.END
+        self._rng = random.Random(1234)
+
+    def _init_state(self):
+        self._init_snake()
+        self._init_food()
+
+    def _init_snake(self):
+        pass
+    
+    def _init_food(self):
+        pass
+
+
+
+
+class CursesSnakeGame(object):
+
+    def _init__(self):
+
         with self._curse_env() as _:
             self._loop()
 
@@ -123,8 +165,8 @@ def main():
     """main program
     """
     logging.basicConfig(level=logging.INFO)
-    Snake()
-
+    # Snake()
+    SnakeStateMachine()
 
 if __name__ == "__main__":
     main()
