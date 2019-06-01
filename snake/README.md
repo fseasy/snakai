@@ -1,8 +1,10 @@
 # SNAKE Game
 
-The game is rewrite based on https://gist.github.com/sanchitgangwar/2158089 . We split the 
+The game rewrited based on https://gist.github.com/sanchitgangwar/2158089 . 
+
+We split the 
 drawing logic and game inner state, so that it can be easily migrated to any other UI system. 
-What's more, it the first step to make a snake-ai -> in trainning, we just need the game state, and
+What's more, it the first step to make a snake-ai -> in trainning, we just need the game state, while
 the GUI became a burden.
 
 ## Game Screenshot
