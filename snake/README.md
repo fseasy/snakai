@@ -9,7 +9,7 @@ the GUI became a burden.
 
 ## Game Screenshot
 
-![screenshot](snake_running.png)
+![screenshot](snake_game_running.png)
 
 ## Files
 
