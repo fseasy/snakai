@@ -8,19 +8,24 @@ import curses
 import logging
 import random
 
+import collections
+
+class Direction(object):
+    """direction"""
+    LEFT = 0
+    RIGHT = 1
+    UP = 2
+    DOWN = 3
+    NONE = 4
+
+
+Point = collections.namedtuple('Point', "x, y")
+
 
 class SnakeStateMachine(object):
     """snake-state-machine
     only keep inner status, the IO logic should be impl in the other class. 
     """
-    class Direction(object):
-        """direction"""
-        LEFT = 0
-        RIGHT = 1
-        UP = 2
-        DOWN = 3
-        UNDEFINED = 4
-
 
     class InnerStatus(object):
         """inner status"""
@@ -31,26 +36,70 @@ class SnakeStateMachine(object):
     def __init__(self):
         """init 
         """
-        self.window_height = 20
         self.window_width = 60
+        self.window_height = 20
         self.snake = None
         self.food = None
-        self.score = 0
-        self.direction = self.Direction.UNDEFINED
+        self.score = None
+        self.direction = Direction.NONE
         self.status = self.InnerStatus.END
         self._rng = random.Random(1234)
 
+        self._init_state()
+
+    def update_state(self, action):
+        """
+        Parameters
+        ------------
+        action: Direction
+        """
+        pass
+
+
     def _init_state(self):
-        self._init_snake()
-        self._init_food()
+        
+        SNAKE_LENGTH = 3
+        
+        def _random_snake_head():
+            """init a snake
+            """
+            head_x = self._rng.randrange(SNAKE_LENGTH + 1, self.window_width - SNAKE_LENGTH - 1)
+            head_y = self._rng.randrange(SNAKE_LENGTH + 1, self.window_height - SNAKE_LENGTH - 1)
+            return Point(head_x, head_y)
+        
+        def _random_food(snake_head):
+            # rand a food, can't in snake
+            while True:
+                x = self._rng.randrange(0, self.window_width)
+                y = self._rng.randrange(0, self.window_height)
+                if x == snake_head.x or y == snake_head.y:
+                    # food should not be in the same x and y with snake head.
+                    continue
+                return Point(x, y)
 
-    def _init_snake(self):
-        pass
-    
-    def _init_food(self):
-        pass
+        def _get_direction(snake_head, food):
+            # snake is has left & right direction
+            # should head for the food in the initialization.
+            return Direction.RIGHT if snake_head.x <= food.x else Direction.LEFT
+        
+        def _init_snake(snake_head, direction):
+            tail_x_offset = -1 if direction == Direction.RIGHT else 1
+            snake = [snake_head]
+            for i in range(SNAKE_LENGTH - 1):
+                tail = Point(snake_head.x + tail_x_offset * i, snake_head.y)
+                snake.append(tail)
+            return snake
 
+        snake_head = _random_snake_head()
+        food = _random_food(snake_head)
+        direction = _get_direction(snake_head, food)
+        snake = _init_snake(snake_head, direction)
 
+        self.snake = snake
+        self.food = food
+        self.direction = direction
+        self.score = 0
+        self.status = self.InnerStatus.RUNNING
 
 
 class CursesSnakeGame(object):
