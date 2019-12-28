@@ -1,5 +1,7 @@
 # SNAKE Game
 
+> [中文介绍](README_CN.md)
+
 The game rewrited based on https://gist.github.com/sanchitgangwar/2158089 . 
 
 We split the 
@@ -9,12 +11,18 @@ the GUI became a burden.
 
 ## Game Screenshot
 
-![screenshot](snake_game_running.png)
+![screenshot](resource/snake_game_running.png)
+
+## Run
+
+```
+python3 run_curses_based_game.py
+```
 
 ## Files
 
 ```bash
 ---
   | - snake_game_state.py 
-  | - game.py : a runable game based on Curses
+  | - run_curses_based_game.py : a runable game based on Curses
 ```

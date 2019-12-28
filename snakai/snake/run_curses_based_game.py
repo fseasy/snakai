@@ -6,7 +6,8 @@ guided by https://gist.github.com/sanchitgangwar/2158089
 import contextlib
 import curses
 
-import snake_state_machine
+from snakai.snake import snake_state_machine
+
 
 class CursesSnakeGame(object):
 

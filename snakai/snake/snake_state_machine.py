@@ -65,7 +65,6 @@ class SnakeStateMachine(object):
         self.steps = None
         self._status = self.InnerStatus.UN_INIT
         self._rng = random.Random()
-        self._logger = self._build_logger()
 
     def is_state_ok(self):
         """query whether current state is ok
@@ -204,15 +203,3 @@ class SnakeStateMachine(object):
         """whether SUCCESS
         """
         return self._status == self.InnerStatus.SUCCESS
-
-
-    def _build_logger(self):
-        logger = logging.getLogger(self.__class__.__name__)
-        formatter = logging.Formatter("%(asctime)s %(levelname)-8s: %(message)s")
-
-        file_handler = logging.FileHandler("snake_game_state.log", mode="w")
-        file_handler.setFormatter(formatter)
-
-        logger.addHandler(file_handler)
-        logger.setLevel(logging.DEBUG)
-        return logger
