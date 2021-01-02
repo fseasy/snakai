@@ -1,6 +1,6 @@
 # snakai 有AI的贪吃蛇
 
-![Upload \Python Package](https://github.com/fseasy/snakai/workflows/Upload%20Python%20Package/badge.svg?event=deployment)
+![Upload Python Package](https://github.com/fseasy/snakai/workflows/Upload%20Python%20Package/badge.svg)
 
 snake is running! our project final goal is to build a snake game driven by Reinforcement Learning.
 
@@ -30,15 +30,15 @@ you will see following screen if no exception.
 
 ## Progress / 进度
 
-[x] draw snake based on curses. 绘制贪吃蛇（控制台） [DONE]
+- [x] draw snake based on curses. 绘制贪吃蛇（控制台） [DONE]
 
     从 https://gist.github.com/sanchitgangwar/2158089 下载了一个示例，照着学习。
 
-[] rule-based strategy. 基于规则的AI [TODO]
+- [] rule-based strategy. 基于规则的AI [TODO]
 
-[] RL-based strategy. 基于强化学习的AI [TODO] 
+- [] RL-based strategy. 基于强化学习的AI [TODO] 
         
-[] unity or some other game-engine driven snake? 基于其他游戏引擎的贪吃蛇？ [TODO]
+- [] unity or some other game-engine driven snake? 基于其他游戏引擎的贪吃蛇？ [TODO]
 
 
 ## 日志
