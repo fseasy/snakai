@@ -2,10 +2,10 @@
 """snake game state definitions
 """
 
+import collections
+import itertools
 import logging
 import random
-import itertools
-import collections
 
 
 class Direction(object):
@@ -53,16 +53,17 @@ class SnakeStateMachine(object):
         SUCCESS = 2
         UN_INIT = 3
 
-    def __init__(self):
+    def __init__(self, width, height):
         """init 
         """
-        self.window_width = 60
-        self.window_height = 20
         self.snake = None
         self.food = None
         self.score = None
         self.direction = Direction.NONE
         self.steps = None
+        
+        self._w = width
+        self._h = height
         self._status = self.InnerStatus.UN_INIT
         self._rng = random.Random()
 
@@ -106,7 +107,7 @@ class SnakeStateMachine(object):
         def _has_collision():
             new_head = self.snake[0]
             # case1: new-head collide on the edge
-            if new_head.x in [-1, self.window_width] or new_head.y in [-1, self.window_height]:
+            if new_head.x in [-1, self._w] or new_head.y in [-1, self._h]:
                 return True
             # case2: new-head collide on self body
             for test_point in itertools.islice(self.snake, 1, len(self.snake)):
@@ -119,14 +120,14 @@ class SnakeStateMachine(object):
             return new_head == self.food
 
         def _has_succeeded():
-            return len(self.snake) == self.window_height * self.window_width
+            return len(self.snake) == self._h * self._w
 
         def _update_food():
             # if snake is too long and occupies almost all space, 
             # this logic may dramatically costly
             while True:
-                x = self._rng.randrange(0, self.window_width)
-                y = self._rng.randrange(0, self.window_height)
+                x = self._rng.randrange(0, self._w)
+                y = self._rng.randrange(0, self._h)
                 new_food = Point(x, y)
                 if new_food in self.snake:
                     continue
@@ -160,15 +161,15 @@ class SnakeStateMachine(object):
         def _random_snake_head():
             """init a snake
             """
-            head_x = self._rng.randrange(SNAKE_LENGTH + 1, self.window_width - SNAKE_LENGTH - 1)
-            head_y = self._rng.randrange(SNAKE_LENGTH + 1, self.window_height - SNAKE_LENGTH - 1)
+            head_x = self._rng.randrange(SNAKE_LENGTH + 1, self._w - SNAKE_LENGTH - 1)
+            head_y = self._rng.randrange(SNAKE_LENGTH + 1, self._h - SNAKE_LENGTH - 1)
             return Point(head_x, head_y)
         
         def _random_food(snake_head):
             # rand a food, can't in snake
             while True:
-                x = self._rng.randrange(0, self.window_width)
-                y = self._rng.randrange(0, self.window_height)
+                x = self._rng.randrange(0, self._w)
+                y = self._rng.randrange(0, self._h)
                 if x == snake_head.x or y == snake_head.y:
                     # food should not be in the same x and y with snake head.
                     continue
