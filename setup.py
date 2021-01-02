@@ -24,7 +24,6 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
-        "snake",
-        "DeepLearning :: ReinforcementLearning :: Game"
     ],
+    python_requires='>=3.6'
  )
