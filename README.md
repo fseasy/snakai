@@ -1,5 +1,7 @@
 # snakai 有AI的贪吃蛇
 
+![Upload \Python Package](https://github.com/fseasy/snakai/workflows/Upload%20Python%20Package/badge.svg?event=deployment)
+
 snake is running! our project final goal is to build a snake game driven by Reinforcement Learning.
 
 贪吃蛇出动！远期目标是实现强化学习驱动的贪吃蛇游戏。
@@ -24,7 +26,7 @@ run_snake # use -h to see comand options
 
 you will see following screen if no exception.
 
-![screenshot](../resource/snake_game_running.png)
+![screenshot](resource/snake_game_running.png)
 
 ## Progress / 进度
 
