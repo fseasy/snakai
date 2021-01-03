@@ -21,12 +21,12 @@ source snakai_env/bin/activate
 # install 
 pip install snakai
 # pip install -e . # in dev mode
-run_snake # use -h to see comand options
+run_snake -s rule_based # use -h to see comand options
 ```
 
 you will see following screen if no exception.
 
-![screenshot](resource/snake_game_running.png)
+![screenshot](resource/snake_running.gif)
 
 ## Progress / 进度
 
@@ -34,11 +34,13 @@ you will see following screen if no exception.
 
     从 https://gist.github.com/sanchitgangwar/2158089 下载了一个示例，照着学习。
 
-- [] rule-based strategy. 基于规则的AI [TODO]
+    - 完成 package 构建 ＆ 配置上传到 pypi
 
-- [] RL-based strategy. 基于强化学习的AI [TODO] 
+- [ ] rule-based strategy. 基于规则的AI [TODO]
+
+- [ ] RL-based strategy. 基于强化学习的AI [TODO] 
         
-- [] unity or some other game-engine driven snake? 基于其他游戏引擎的贪吃蛇？ [TODO]
+- [ ] unity or some other game-engine driven snake? 基于其他游戏引擎的贪吃蛇？ [TODO]
 
 
 ## 日志

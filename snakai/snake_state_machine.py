@@ -16,15 +16,23 @@ class Direction(object):
     DOWN = 3
     NONE = 4
 
+    _OPPOSITE_DIRECTION = {(LEFT, RIGHT), (RIGHT, LEFT), (UP, DOWN), (DOWN, UP)}
+    _EFFECTIVE_DIRECTION = {LEFT, RIGHT, UP, DOWN}
+
+    @classmethod
+    def get_opposite(cls, d):
+        """get opposite direction
+        """
+        opposite_direction_dict = dict(cls._OPPOSITE_DIRECTION)
+        if d not in opposite_direction_dict:
+            raise ValueError(f"not effective action: {d}")
+        return opposite_direction_dict[d]
+
     @classmethod
     def is_opposite(cls, a, b):
         """whether a and b are the opposite directions 
         """
-        _opposite_enums = set([
-            (cls.LEFT, cls.RIGHT), (cls.RIGHT, cls.LEFT),
-            (cls.UP, cls.DOWN), (cls.DOWN, cls.UP)
-        ])
-        return (a, b) in _opposite_enums
+        return (a, b) in cls._OPPOSITE_DIRECTION
     
     @classmethod
     def is_valid(cls, d):
@@ -33,10 +41,16 @@ class Direction(object):
         return d in {cls.LEFT, cls.RIGHT, cls.UP, cls.DOWN, cls.NONE}
     
     @classmethod
+    def get_effective(cls) -> set:
+        """get effective directions
+        """
+        return cls._EFFECTIVE_DIRECTION
+
+    @classmethod
     def is_effective(cls, d):
         """whether d is a effective direction
         """
-        return d in {cls.LEFT, cls.RIGHT, cls.UP, cls.DOWN}
+        return d in cls.get_effective()
 
 
 Point = collections.namedtuple('Point', "x, y")
@@ -45,6 +59,20 @@ Point = collections.namedtuple('Point', "x, y")
 class SnakeStateMachine(object):
     """snake-state-machine
     only keep inner status, the IO logic should be impl in the other class. 
+    
+    the state mainly including 3 elements:
+    1. environment: should be viewed as a matrix, 
+        with w = width, h = height
+        the matrix is consisted of points, each has position.
+        the position starts with 0. 
+        so all the points should bound in: x \in [0, w), y \in [0, h)
+    2. snake: could be viewed as a list of continuous points and a direction.
+        snake is some points in the environments. it has a direction.
+    3. feed: a point.
+
+    what's more, some extra elements is used for game:
+    1. score: game score, currently equals to the food eaten
+    2. steps: move steps. each update on not-ended state should increase the steps.
     """
     class InnerStatus(object):
         """inner status"""
@@ -56,10 +84,14 @@ class SnakeStateMachine(object):
     def __init__(self, width, height):
         """init 
         """
+        # type: deque
         self.snake = None
+        # type: Point
         self.food = None
+        # type: float
         self.score = None
         self.direction = Direction.NONE
+        # type: int
         self.steps = None
         
         self._w = width
@@ -72,11 +104,11 @@ class SnakeStateMachine(object):
         """
         return self._status == self.InnerStatus.RUNNING
 
-    def update_state(self, action):
+    def update_state(self, d):
         """
         Parameters
         ------------
-        action: Direction
+        d: Direction
 
         Returns
         ---------
@@ -84,27 +116,18 @@ class SnakeStateMachine(object):
             whether game is ok.
         """
         def _udpate_direction():
-            if not Direction.is_effective(action) or Direction.is_opposite(action, self.direction):
+            if not Direction.is_effective(d) or Direction.is_opposite(d, self.direction):
                 return
-            self.direction = action
+            self.direction = d
 
         def _add_snake_head():
             current_head_p = self.snake[0]
             d = self.direction
-            if d == Direction.LEFT:
-                new_head = Point(current_head_p.x - 1, current_head_p.y)
-            elif d == Direction.RIGHT:
-                new_head = Point(current_head_p.x + 1, current_head_p.y)
-            elif d == Direction.UP:
-                new_head = Point(current_head_p.x, current_head_p.y - 1)
-            elif d == Direction.DOWN:
-                new_head = Point(current_head_p.x, current_head_p.y + 1)
-            else:
-                raise ValueError("invalid direction")
+            new_head = gen_next_step_point(current_head_p, d)
             # no need to check collision
             self.snake.appendleft(new_head)         
 
-        def _has_collision():
+        def _is_new_head_collide():
             new_head = self.snake[0]
             # case1: new-head collide on the edge
             if new_head.x in [-1, self._w] or new_head.y in [-1, self._h]:
@@ -137,12 +160,15 @@ class SnakeStateMachine(object):
 
         if not self.is_state_ok():
             return False
+
         self.steps += 1
         _udpate_direction()
+        
         _add_snake_head()
-        if _has_collision():
+        if _is_new_head_collide():
             self._status = self.InnerStatus.FAIL
             return False
+
         if _has_eaten_food():
             self.score += 1
             if _has_succeeded():
@@ -152,6 +178,7 @@ class SnakeStateMachine(object):
         else:
             # remove tail to make a moving illusion
             self.snake.pop()
+
         return True
 
     def new_state(self):
@@ -204,3 +231,42 @@ class SnakeStateMachine(object):
         """whether SUCCESS
         """
         return self._status == self.InnerStatus.SUCCESS
+
+    def is_outer_point_collide2snake(self, p: Point) -> bool:
+        """whether collide to the snake body?
+        here we don't consider the window-edge.
+        """
+        for test_point in self.snake:
+            if test_point == p:
+                return True
+        return False
+
+    @property
+    def state_width(self):
+        """get width"""
+        return self._w
+    
+    @property
+    def state_height(self):
+        """get height"""
+        return self._h
+
+
+def gen_next_step_point(p: Point, direction: Direction) -> Point:
+    """generate next step point according to current point and direction
+    """
+    if not Direction.is_effective(direction):
+        raise ValueError(f"not effective direction {direction}")
+    
+    x = p.x
+    y = p.y
+    if direction == Direction.LEFT:
+        return Point(x - 1, y)
+    elif direction == Direction.RIGHT:
+        return Point(x + 1, y)
+    elif direction == Direction.UP:
+        return Point(x, y - 1)
+    elif direction == Direction.DOWN:
+        return Point(x, y + 1)
+    
+    raise ValueError(f"impossible direction [{direction}], something must wrong.")

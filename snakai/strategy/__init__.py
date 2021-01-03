@@ -25,8 +25,6 @@ def get_strategy_cls(name):
     """
     return _name2startegy_cls[name]
 
-from . import manual_strategy
-
 
 def init_strategy(name, curses_ui, frame_time):
     """init strategy
@@ -34,4 +32,11 @@ def init_strategy(name, curses_ui, frame_time):
     cls = get_strategy_cls(name)
     if name == "manual":
         return cls(curses_ui, frame_time)
+    elif name == "rule_based":
+        return cls()
+        
     raise ValueError(f"strategy class {name} has not proper initialization")
+
+
+from . import manual
+from . import rule_based

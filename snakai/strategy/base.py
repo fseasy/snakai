@@ -4,6 +4,8 @@ control how to move the snake
 """
 import enum
 
+from .. import snake_state_machine as ssm
+
 
 class Action(enum.Enum):
     """strategy action
@@ -16,6 +18,21 @@ class Action(enum.Enum):
     EXIT = 4
     PAUSE_RESUME = 5
     IDLE = 6
+
+    @classmethod
+    def effective_direction2action(cls, d: ssm.Direction) -> 'Action':
+        """direction -> action
+        """
+        _D = ssm.Direction
+        _m = {
+            _D.LEFT: cls.MOVE_LEFT,
+            _D.RIGHT: cls.MOVE_RIGHT,
+            _D.UP: cls.MOVE_UP,
+            _D.DOWN: cls.MOVE_DOWN
+        }
+        if d not in _m:
+            raise ValueError(f"[{d}] not supported for direction->action")
+        return _m[d]
 
 
 class Strategy(object):

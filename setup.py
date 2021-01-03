@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='snakai',  
-    version='1.1.dev1',
+    version='1.1-alpha',
     entry_points={
         'console_scripts': [
             'run_snake=snakai.run:main',

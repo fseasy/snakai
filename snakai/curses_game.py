@@ -73,7 +73,6 @@ class CursesSnakeGameExe(object):
         """
         gs = self._game_state
         ui = self._ui
-        ui.curses_log(f"got direction: {direction}")
         # cache previous state
         before_update_score = gs.score
         before_update_tail = gs.snake[-1]
@@ -119,10 +118,15 @@ class CursesSnakeGameExe(object):
         is_paused = False
 
         while True:
+            # need refresh to display the latest view
+            self._ui.refresh()
+            
             direction = _D.NONE
             # action and direction
             with keep_time(self.frame_time / self.SPEED_UP_RATIO):
                 action = strategy.gen_next_action(self._game_state)
+
+            self._ui.curses_log(f"get action = {action}")
 
             if action == _A.EXIT:
                 break
@@ -171,6 +175,7 @@ class CursesSnakeGameUI(object):
     def init_window(self):
         """init curses env and 
         """
+        # both height, width has extra border line. so following point should also has 1 offset
         win = curses.newwin(self._h + 2, self._w + 2, 0, 0)
         # bind the win
         self._win = win
@@ -178,7 +183,6 @@ class CursesSnakeGameUI(object):
         win.keypad(1)
         win.border(0)
         win.nodelay(1)
-        win.border(0)
         win.addstr(0, 27, ' SNAKE ')
 
         self.set_score(0)
@@ -209,6 +213,14 @@ class CursesSnakeGameUI(object):
         """curses log
         """
         self._win.addstr(self._h + 1, 0, s)
+
+    def refresh(self):
+        """curses need refresh, so that it can draw!
+        `getch` implictly call `refresh`
+        https://stackoverflow.com/questions/19748685/curses-library-why-does-getch-clear-my-screen
+        """
+        self._win.refresh()
+        
 
 
 @contextlib.contextmanager
