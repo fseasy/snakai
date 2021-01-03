@@ -28,6 +28,8 @@ you will see following screen if no exception.
 
 ![screenshot](resource/snake_running.gif)
 
+> screen by the fantastic [ScreenToGif](https://github.com/NickeManarin/ScreenToGif)
+
 ## Progress / 进度
 
 - [x] draw snake based on curses. 绘制贪吃蛇（控制台） [DONE]
