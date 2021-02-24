@@ -17,9 +17,6 @@ class CursesSnakeGameExe(object):
     FOOD_CH = "*"
     SNAKE_CH = "#"
 
-    WIDTH = 60
-    HEIGHT = 20
-
     # name to interval seconds
     SPEED = {
         "normal": 0.15,
@@ -29,10 +26,10 @@ class CursesSnakeGameExe(object):
     # use the same direction key to speed up snake running
     SPEED_UP_RATIO = 5
 
-    def __init__(self, speed="normal"):
+    def __init__(self, win_width=60, win_height=20, speed="normal"):
         self._frame_time = self.SPEED[speed]
-        self._game_state = snake_state_machine.SnakeStateMachine(self.WIDTH, self.HEIGHT)
-        self._ui = CursesSnakeGameUI(self.WIDTH, self.HEIGHT)
+        self._game_state = snake_state_machine.SnakeStateMachine(win_width, win_height)
+        self._ui = CursesSnakeGameUI(win_width, win_height)
 
     def run(self, strategy):
         """run game
