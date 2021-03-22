@@ -94,7 +94,7 @@ class CursesSnakeGameExe(object):
 
     def _print_result(self):
         # check result and echo
-        if self._game_state.is_end_with_successed():
+        if self._game_state.is_success():
             print("Congratulations! You Succeed! Score = {}".format(self._game_state.score))
         else:
             print("Game Over. Score = {} in steps {}".format(self._game_state.score, self._game_state.steps))

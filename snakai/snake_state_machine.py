@@ -227,10 +227,15 @@ class SnakeStateMachine(object):
         self.steps = 0
         self._status = self.InnerStatus.RUNNING
 
-    def is_end_with_successed(self):
+    def is_success(self):
         """whether SUCCESS
         """
         return self._status == self.InnerStatus.SUCCESS
+
+    def is_fail(self):
+        """whether fail
+        """
+        return self._status == self.InnerStatus.FAIL
 
     def is_outer_point_collide2snake(self, p: Point) -> bool:
         """whether collide to the snake body?

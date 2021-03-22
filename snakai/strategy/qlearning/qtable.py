@@ -2,13 +2,14 @@
 """ Q-Learning table
 it includes state, action, state2action-value-sheet(QTable)
 """
+import collections
+
 import numpy as np
 
 
 class QTable(object):
     """Q table
     """
-
     def __init__(self, win_width, win_height):
         """init q table
         """
@@ -18,30 +19,41 @@ class QTable(object):
         _action_sz = self._action_translator.size()
         self._raw_table = np.zeros(
             (_state_sz, _action_sz), 0., dtype=np.float32)
+        self._rng = np.random.RandomState(1234)
+
+    def get_max_action(self, game_state):
+        """get max action of current game-state
+        """ 
+        state_idx = self._state_translator.state2id(game_state)
 
 
 class QStateTranslator(object):
     """defines QState translator.
     from a game-state to QLearning state (index represented)
     """
+    _InnerState = collections.namedtuple("_InnerState", ["barrier_up", "barrier_down", 
+            "barrier_left", "barrier_right", "food_x", "food_y"])
 
     def __init__(self, win_width, win_height):
         self._w = win_width
         self._h = win_height
         self._x_encoder = _DistanceDiscretizer(win_width)
         self._y_encoder = _DistanceDiscretizer(win_height)
-        self._state2id = self._build_state2id()
+        self._inner_state2id = self._build_state2id()
 
     def state2id(self, game_state):
         """from game-state to index
         1. game-state -> inner state
         2. inner state -> idx
         """
+        ## 1. game-state -> inner state
+        # 
+        ## 2. inner-state -> idx
 
     def size():
         """get size
         """
-        return len(self._state2id)
+        return len(self._inner_state2id)
 
     def _build_state2id(self):
         """
@@ -57,11 +69,11 @@ class QStateTranslator(object):
         # besides the valid distance,
         # snake has invalid distance for direction of opposite
         # e.g. snake head towards right, then for left, it is invalid direction.
-        # this condition should be split with valid distance 0
+        # this condition should be distinguished from valid distance 0
         # in 1 state, only 1 direction can be invalid direction.
         # this means, the full barrier state size should be
         # x-vald-size ^ 2 * y-valid-size * 2
-        # + 2 * x-valid-size * y-valid-size ^ 2
+        # + 2 * x-valid-size * y-valid-size ^ 2   (that is:  y * y *x * 1 + y * y * 1 * x))
         # + 2 * x-valid-size ^ 2 * y-valid-size
         # * for food distance
         # it has positive and negative. say: -max-id ... 0 ... max-id = 2 * max-id - 1
@@ -85,7 +97,7 @@ class QStateTranslator(object):
 
         def _recursive_build_state(current_state, iter_state_schema_idx):
             if iter_state_schema_idx >= len(iter_state_schemas):
-                state_tuple = tuple(current_state)
+                state_tuple = self._InnerState(*current_state)
                 _m[state_tuple] = len(_m)
                 return
             cur_direction_states = iter_state_schames[iter_state_schema_idx]
@@ -105,6 +117,15 @@ class QStateTranslator(object):
                           * (2 * x_valid_id_sz - 1)
                           * (2 * y_valid_id_sz - 1))
         return _m
+
+    def _game_state2inner_state(self, game_state):
+        """
+        game_state: snake_state_machine.SnakeStateMachine
+        inner_state: _InnerState
+        """
+        # TODO here: need calc to food distance.
+        if game_state.is_fail():
+            return 
 
 
 class ActionTranslator(object):
@@ -137,7 +158,7 @@ class _DistanceDiscretizer(object):
         return self._dist2id[dist]
 
     def size(self):
-        """get id size (max_id + 1)
+        """get discretized id size
         """
         return self._dist2id[-1] + 1
 
