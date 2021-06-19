@@ -4,6 +4,7 @@
 import enum
 import argparse
 import typing
+import pickle
 
 import numpy as np
 
@@ -23,7 +24,7 @@ class QLearningStrategy(Strategy):
         """init strategy.
         """
         if is_infer:
-            with open(infer_args.model_path, mode="b") as mf:
+            with open(infer_args.model_path, mode="rb") as mf:
                 self._qtable = pickle.load(mf)
         else:
             self._qtable = QTable(win_width=train_args.win_width, win_height=train_args.win_height)

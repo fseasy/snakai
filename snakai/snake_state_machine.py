@@ -67,8 +67,8 @@ class SnakeStateMachine(object):
         the position starts with 0. 
         so all the points should bound in: x \in [0, w), y \in [0, h)
     2. snake: could be viewed as a list of continuous points and a direction.
-        snake is some points in the environments. it has a direction.
-    3. feed: a point.
+        snake is some continuous points in the environments. it has a direction.
+    3. feed: a point in the environment.
 
     what's more, some extra elements is used for game:
     1. score: game score, currently equals to the food eaten
@@ -121,14 +121,14 @@ class SnakeStateMachine(object):
             self.direction = d
 
         def _add_snake_head():
-            current_head_p = self.snake[0]
+            current_head_p = self.head
             d = self.direction
             new_head = gen_next_step_point(current_head_p, d)
             # no need to check collision
             self.snake.appendleft(new_head)         
 
         def _is_new_head_collide():
-            new_head = self.snake[0]
+            new_head = self.head
             # case1: new-head collide on the edge
             if new_head.x in [-1, self._w] or new_head.y in [-1, self._h]:
                 return True
@@ -139,7 +139,7 @@ class SnakeStateMachine(object):
             return False
         
         def _has_eaten_food():
-            new_head = self.snake[0]
+            new_head = self.head
             return new_head == self.food
 
         def _has_succeeded():
@@ -256,6 +256,10 @@ class SnakeStateMachine(object):
         """get height"""
         return self._h
 
+    @property
+    def head(self):
+        """head"""
+        return self.snake[0]
 
 def gen_next_step_point(p: Point, direction: Direction) -> Point:
     """generate next step point according to current point and direction

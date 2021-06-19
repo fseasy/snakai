@@ -22,7 +22,7 @@ setuptools.setup(
     url="https://github.com/fseasy/snakai",
     packages=setuptools.find_packages(),
     install_requires=[
-        'numpy',
+        'numpy'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
