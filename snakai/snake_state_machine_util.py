@@ -13,7 +13,10 @@ class DistanceCalc(object):
         self._key_points = self._prepare_key_points()
 
     def barrier_up_dist(self):
-        """get barrier up distance"""
+        """get barrier up distance
+        Returns:
+           int (>= 0)
+        """
         head = self._s.head
         x_axis_points = self._key_points["x_axis_same2head"] 
         if not x_axis_points:
@@ -26,7 +29,10 @@ class DistanceCalc(object):
         return head.y - most_lower_point.y
 
     def barrier_down_dist(self):
-        """barrier down distance"""
+        """barrier down distance
+        Returns:
+            int (>= 0)
+        """
         head = self._s.head
         x_axis_points = self._key_points["x_axis_same2head"]
         if not x_axis_points:
@@ -38,7 +44,10 @@ class DistanceCalc(object):
         return most_upper_point.y - head.y
 
     def barrier_left_dist(self):
-        """barrier left distance"""
+        """barrier left distance
+        Returns:
+            int (>= 0)
+        """
         head = self._s.head
         y_axis_points = self._key_points["y_axis_same2head"]
         if not y_axis_points:
@@ -50,7 +59,10 @@ class DistanceCalc(object):
         return head.x - most_right_point.x
 
     def barrier_right_dist(self):
-        """barrier right distance"""
+        """barrier right distance
+        Returns:
+            int (>= 0)
+        """
         head = self._s.head
         y_axis_points = self._key_points["y_axis_same2head"]
         if not y_axis_points:

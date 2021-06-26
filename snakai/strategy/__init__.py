@@ -40,3 +40,4 @@ def init_strategy(name, curses_ui, frame_time):
 
 from . import manual
 from . import rule_based
+from . import qlearning

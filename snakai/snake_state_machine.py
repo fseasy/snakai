@@ -1,56 +1,20 @@
 # -*- coding: utf-8 -*-
 """snake game state definitions
 """
-
+import enum
 import collections
 import itertools
 import logging
 import random
 
 
-class Direction(object):
+class Direction(enum.IntEnum):
     """direction"""
     LEFT = 0
     RIGHT = 1
     UP = 2
     DOWN = 3
     NONE = 4
-
-    _OPPOSITE_DIRECTION = {(LEFT, RIGHT), (RIGHT, LEFT), (UP, DOWN), (DOWN, UP)}
-    _EFFECTIVE_DIRECTION = {LEFT, RIGHT, UP, DOWN}
-
-    @classmethod
-    def get_opposite(cls, d):
-        """get opposite direction
-        """
-        opposite_direction_dict = dict(cls._OPPOSITE_DIRECTION)
-        if d not in opposite_direction_dict:
-            raise ValueError(f"not effective action: {d}")
-        return opposite_direction_dict[d]
-
-    @classmethod
-    def is_opposite(cls, a, b):
-        """whether a and b are the opposite directions 
-        """
-        return (a, b) in cls._OPPOSITE_DIRECTION
-    
-    @classmethod
-    def is_valid(cls, d):
-        """whether d is a valid direction
-        """
-        return d in {cls.LEFT, cls.RIGHT, cls.UP, cls.DOWN, cls.NONE}
-    
-    @classmethod
-    def get_effective(cls) -> set:
-        """get effective directions
-        """
-        return cls._EFFECTIVE_DIRECTION
-
-    @classmethod
-    def is_effective(cls, d):
-        """whether d is a effective direction
-        """
-        return d in cls.get_effective()
 
 
 Point = collections.namedtuple('Point', "x, y")
@@ -88,11 +52,11 @@ class SnakeStateMachine(object):
         self.snake = None
         # type: Point
         self.food = None
-        # type: float
-        self.score = None
         self.direction = Direction.NONE
         # type: int
         self.steps = None
+        # type: float
+        self.score = None
         
         self._w = width
         self._h = height
@@ -261,6 +225,7 @@ class SnakeStateMachine(object):
         """head"""
         return self.snake[0]
 
+
 def gen_next_step_point(p: Point, direction: Direction) -> Point:
     """generate next step point according to current point and direction
     """
@@ -279,3 +244,47 @@ def gen_next_step_point(p: Point, direction: Direction) -> Point:
         return Point(x, y + 1)
     
     raise ValueError(f"impossible direction [{direction}], something must wrong.")
+
+
+class DirectionUtil(object):
+    """direction util
+    """
+    _OPPOSITE_DIRECTION_SET = {
+        (Direction.LEFT, Direction.RIGHT), (Direction.RIGHT, Direction.LEFT), 
+        (Direction.UP, Direction.DOWN), (Direction.DOWN, Direction.UP)
+    }
+    _OPPOSITE_DIRECTION_MAP = dict(_OPPOSITE_DIRECTION_SET)
+    _EFFECTIVE_DIRECTION = {Direction.LEFT, Direction.RIGHT, Direction.UP, Direction.DOWN}
+
+    @classmethod
+    def get_opposite(cls, d: Direction):
+        """get opposite direction
+        """
+        opposite_direction_dict = cls._OPPOSITE_DIRECTION_MAP
+        if d not in opposite_direction_dict:
+            raise ValueError(f"not effective action: {d}")
+        return opposite_direction_dict[d]
+
+    @classmethod
+    def is_opposite(cls, a: Direction, b: Direction) -> bool:
+        """whether a and b are the opposite directions 
+        """
+        return (a, b) in cls._OPPOSITE_DIRECTION_SET
+    
+    @classmethod
+    def is_valid(cls, d: Direction) -> bool:
+        """whether d is a valid direction
+        """
+        return d in {cls.LEFT, cls.RIGHT, cls.UP, cls.DOWN, cls.NONE}
+    
+    @classmethod
+    def get_effective(cls) -> set:
+        """get effective directions
+        """
+        return cls._EFFECTIVE_DIRECTION
+
+    @classmethod
+    def is_effective(cls, d: Direction) -> bool:
+        """whether d is a effective direction
+        """
+        return d in cls.get_effective()

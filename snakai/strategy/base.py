@@ -10,14 +10,14 @@ from .. import snake_state_machine as ssm
 class Action(enum.Enum):
     """strategy action
     """
-    MOVE_LEFT = 0
-    MOVE_RIGHT = 1
-    MOVE_UP = 2
-    MOVE_DOWN = 3
+    MOVE_LEFT = enum.auto()
+    MOVE_RIGHT = enum.auto()
+    MOVE_UP = enum.auto()
+    MOVE_DOWN = enum.auto()
 
-    EXIT = 4
-    PAUSE_RESUME = 5
-    IDLE = 6
+    EXIT = enum.auto()
+    PAUSE_RESUME = enum.auto()
+    IDLE = enum.auto()
 
     @classmethod
     def effective_direction2action(cls, d: ssm.Direction) -> 'Action':
@@ -38,7 +38,19 @@ class Action(enum.Enum):
 class Strategy(object):
     """strategy base
     """
-    def gen_next_action(self, game_state) -> Action:
+    def gen_next_action(self, game_state: ssm.SnakeStateMachine) -> Action:
         """generating next action according to the game-state
         """
         raise NotImplementedError("should impl it")
+
+    def update(self, game_state: ssm.SnakeStateMachine):
+        """update strategy if needed
+        default is do noting.
+        """
+        return
+
+    def start_new(self, game_state: ssm.SnakeStateMachine):
+        """start new strategy
+        default do noting
+        """
+        return
