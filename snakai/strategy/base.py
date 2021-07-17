@@ -34,6 +34,18 @@ class Action(enum.Enum):
             raise ValueError(f"[{d}] not supported for direction->action")
         return _m[d]
 
+    def to_direction(self) -> ssm.Direction:
+        """action to direction"""
+        _D = ssm.Direction
+        _m = {
+            Action.MOVE_LEFT: _D.LEFT,
+            Action.MOVE_RIGHT: _D.RIGHT,
+            Action.MOVE_UP: _D.UP,
+            Action.MOVE_DOWN: _D.DOWN
+        }
+        # if no valid, just raise exception
+        return _m[self]
+
 
 class Strategy(object):
     """strategy base
@@ -49,8 +61,8 @@ class Strategy(object):
         """
         return
 
-    def start_new(self, game_state: ssm.SnakeStateMachine):
-        """start new strategy
+    def clear4next(self, game_state: ssm.SnakeStateMachine):
+        """clear inner temporatory state for next running
         default do noting
         """
         return

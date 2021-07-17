@@ -11,6 +11,9 @@ class QTable(object):
         row is the states
         col is the action.
         value is the action score.  
+
+        state mapping or action mapping is controlled in outter.
+        QTable only has index view.
     """
     def __init__(self, state_size, action_size):
         """init q table

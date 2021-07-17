@@ -10,6 +10,7 @@ def register(name):
 
     def _decorator_fn(cls):
         _name2startegy_cls[name] = cls
+        return cls
 
     return _decorator_fn
 

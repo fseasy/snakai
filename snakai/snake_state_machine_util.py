@@ -10,6 +10,7 @@ class DistanceCalc(object):
     """
     def __init__(self, state: ssm.SnakeStateMachine):
         self._s = state
+        # used for distance calculation helper
         self._key_points = self._prepare_key_points()
 
     def barrier_up_dist(self):

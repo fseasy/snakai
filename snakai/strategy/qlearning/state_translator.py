@@ -24,9 +24,11 @@ class StateTranslator(object):
     def __init__(self, win_width, win_height):
         self._w = win_width
         self._h = win_height
-        # max-distance should be size - 1
-        self._x_encoder = _DistanceDiscretizer(win_width - 1)
-        self._y_encoder = _DistanceDiscretizer(win_height - 1)
+        # max-distance should be `x + 1`. 
+        # because we should considering the extra borders!
+        # see, it width = 5, then the left border idx = 0, right border idx = 6, the max-dist = 6
+        self._x_encoder = _DistanceDiscretizer(win_width + 1)
+        self._y_encoder = _DistanceDiscretizer(win_height + 1)
         self._inner_state2id = self._build_state2id()
         self._id2inner_state = {v: k for (k, v) in self._inner_state2id.items()}
 
@@ -159,7 +161,6 @@ class _DistanceDiscretizer(object):
     def dist2id(self, dist):
         """distance to decretized id
         """
-        assert 0 <= dist <= self._max_dist
         return self._dist2id[dist]
 
     def ids(self):

@@ -48,7 +48,7 @@ class SnakeStateMachine(object):
     def __init__(self, width, height):
         """init 
         """
-        # type: deque
+        # type: collections.deque
         self.snake = None
         # type: Point
         self.food = None
@@ -63,12 +63,12 @@ class SnakeStateMachine(object):
         self._status = self.InnerStatus.UN_INIT
         self._rng = random.Random()
 
-    def is_state_ok(self):
+    def is_state_ok(self) -> bool:
         """query whether current state is ok
         """
         return self._status == self.InnerStatus.RUNNING
 
-    def update_state(self, d):
+    def update_state(self, d: Direction) -> bool:
         """
         Parameters
         ------------
@@ -80,7 +80,7 @@ class SnakeStateMachine(object):
             whether game is ok.
         """
         def _udpate_direction():
-            if not Direction.is_effective(d) or Direction.is_opposite(d, self.direction):
+            if not DirectionUtil.is_effective(d) or DirectionUtil.is_opposite(d, self.direction):
                 return
             self.direction = d
 
@@ -229,7 +229,7 @@ class SnakeStateMachine(object):
 def gen_next_step_point(p: Point, direction: Direction) -> Point:
     """generate next step point according to current point and direction
     """
-    if not Direction.is_effective(direction):
+    if not DirectionUtil.is_effective(direction):
         raise ValueError(f"not effective direction {direction}")
     
     x = p.x

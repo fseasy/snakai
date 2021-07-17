@@ -12,7 +12,7 @@ from . import qtable as qtable_module
 from . import state_translator
 from . import action_translator
 from . import reward as reward_module
-from . import base as strategy_base
+from .. import base as strategy_base
 from .. import register
 from ... import snake_state_machine as ssm
 
@@ -22,9 +22,9 @@ class QLearningStrategy(strategy_base.Strategy):
     """Q-Learning strategy
     it both has training & infer api.
     """
-    _Episode = collections.namedtuple("Status", ["state_id", "action_id"])
+    _Episode = collections.namedtuple("_Episode", ["state_id", "action_id"])
 
-    def __init_(self, 
+    def __init__(self, 
             is_infer: bool, 
             train_args: typing.Optional[argparse.Namespace], 
             infer_args: typing.Optional[argparse.Namespace]):
@@ -77,7 +77,12 @@ class QLearningStrategy(strategy_base.Strategy):
         return action
     
     def update(self, game_state: ssm.SnakeStateMachine):
-        """update QLearning Strategy (QTable)"""
+        """update QLearning Strategy (QTable)
+        Parameters
+        =============
+        game_state: here should be the new game state, that is
+            After taken the previous predicted action.
+        """
         reward = self._reward_calc(game_state)
         if game_state.is_state_ok():
             # game still running
@@ -90,22 +95,24 @@ class QLearningStrategy(strategy_base.Strategy):
             new_state_idx = None
             # ended (ignore pause condition)
             q_target = reward
-        q_predict = self._qtable.get_score(**self._pre_episode)
+        q_predict = self._qtable.get_score(**self._pre_episode._asdict())
         new_score = q_predict + self._learning_rate * (q_target - q_predict)
-        self._qtable.update_score(**self._pre_episode, score=new_score)
+        self._qtable.update_score(**self._pre_episode._asdict(), score=new_score)
         self._cached_cur_state_idx = new_state_idx
 
-    def start_new(self, _):
-        """start new strategy. 
+    def clear4next(self, _):
+        """clear inner state and ready for next new strategy. 
         here clear inner status
         """
         self._pre_episode = None
         self._cached_cur_state_idx = None
+        if self._exploration_rate > 0:
+            self._exploration_rate -= self._exploration_decay_delta
 
     def _gen_random_action(self, cur_diction: ssm.Direction) -> strategy_base.Action:
-        opposite_d = ssm.Direction.get_opposite(cur_diction)
+        opposite_d = ssm.DirectionUtil.get_opposite(cur_diction)
         opposite_action = strategy_base.Action.effective_direction2action(opposite_d)
-        candidate_action = [a for a in self._action_translator.actions if a != opposite_action]
+        candidate_action = list(set(self._action_translator.actions()) - {opposite_action,})
         return self._rng.choice(candidate_action)
 
     def _gen_greedy_action(self, state_idx: int) -> strategy_base.Action:

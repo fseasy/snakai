@@ -33,7 +33,6 @@ class ActionTranslator(object):
         """action to id"""
         return cls._ACTION2ID[action]
 
-    @property
     @classmethod
     def actions(cls):
         """get all actions"""
