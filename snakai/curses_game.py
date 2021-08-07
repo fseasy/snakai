@@ -14,9 +14,6 @@ from .strategy import base as base_strategy
 class CursesSnakeGameExe(object):
     """Curses based snake executor
     """
-    FOOD_CH = "*"
-    SNAKE_CH = "#"
-
     # name to interval seconds
     SPEED = {
         "normal": 0.15,
@@ -29,7 +26,8 @@ class CursesSnakeGameExe(object):
     def __init__(self, win_width=60, win_height=20, speed="normal"):
         self._frame_time = self.SPEED[speed]
         self._game_state = snake_state_machine.SnakeStateMachine(win_width, win_height)
-        self._ui = CursesSnakeGameUI(win_width, win_height)
+        self._ui = SnakeUIFramework(win_width, win_height)
+        self._state_render = SnakeStateRender(self._ui)
 
     def run(self, strategy):
         """run game
@@ -37,9 +35,10 @@ class CursesSnakeGameExe(object):
         """
         with self._ui.active_env():
             self._ui.init_window()
-            
+            # init
             self._game_state.new_state()
-            self._draw_init_state()
+            self._state_render.render_init_state(self._game_state)
+            # exe continues
             self._exe_game(strategy)
 
         self._print_result()
@@ -56,70 +55,18 @@ class CursesSnakeGameExe(object):
         """
         return self._frame_time
 
-    def _draw_init_state(self):
-        # food
-        self._ui.draw_point(self._game_state.food, self.FOOD_CH)
-        # body
-        for p in self._game_state.snake:
-            self._ui.draw_point(p, self.SNAKE_CH)
-        # score
-        self._ui.set_score(self._game_state.score)
-
-    def _update_state_and_draw(self, direction):
-        """given a new direction, update the game-state and draw 
-        """
-        gs = self._game_state
-        ui = self._ui
-        # cache previous state
-        before_update_score = gs.score
-        before_update_tail = gs.snake[-1]
-        # update state
-        gs.update_state(direction)
-        if not gs.is_state_ok():
-            # direction cause state failed.
-            return False
-        # draw ui
-        new_head = gs.snake[0]
-        ui.draw_point(new_head, self.SNAKE_CH)
-        new_score = gs.score
-        has_eat_food = new_score > before_update_score
-        if not has_eat_food:
-            # => food hadn't been eatten => erase tail
-            ui.erase_point(before_update_tail)
-        else:
-            # => new food(no need to erase previous food), new score
-            ui.draw_point(gs.food, self.FOOD_CH)
-            ui.set_score(new_score)
-        return True
-
-    def _print_result(self):
-        # check result and echo
-        if self._game_state.is_success():
-            print("Congratulations! You Succeed! Score = {}".format(self._game_state.score))
-        else:
-            print("Game Over. Score = {} in steps {}".format(self._game_state.score, self._game_state.steps))
-
     def _exe_game(self, strategy):
         """execute game (while loop)
         """
         _A = base_strategy.Action
         _D = snake_state_machine.Direction
-        action2direction = {
-            _A.MOVE_LEFT: _D.LEFT,
-            _A.MOVE_RIGHT: _D.RIGHT,
-            _A.MOVE_DOWN: _D.DOWN,
-            _A.MOVE_UP: _D.UP,
-            _A.IDLE: _D.NONE
-        }
-        
-        is_paused = False
 
+        is_paused = False
         while True:
             # need refresh to display the latest view
             self._ui.refresh()
             
-            direction = _D.NONE
-            # action and direction
+            # receive next action
             with keep_time(self.frame_time / self.SPEED_UP_RATIO):
                 action = strategy.gen_next_action(self._game_state)
 
@@ -129,21 +76,79 @@ class CursesSnakeGameExe(object):
                 break
             elif action == _A.PAUSE_RESUME:
                 is_paused = not is_paused
-            elif action in action2direction:
-                direction = action2direction[action]
+                direction = _D.NONE
+            elif action == _A.IDLE:
+                direction = _D.NONE
+            else:
+                direction = action.to_direction()
             
             if is_paused:
                 self._ui.curses_log("Paused. use [SPACE] to Resume.")
                 continue
 
-            # update
-            is_ok = self._update_state_and_draw(direction)
+            # update state
+            is_ok = self._game_state.update_state(direction)
             if not is_ok:
                 break
+            # update ui render
+            self._state_render.render_updated_state(self._game_state)
+
+    def _print_result(self):
+        # check result and echo
+        if self._game_state.is_success():
+            print("Congratulations! You Succeed! Score = {}".format(self._game_state.score))
+        else:
+            print("Game Over. Score = {} in steps {}".format(self._game_state.score, self._game_state.steps))
 
 
-class CursesSnakeGameUI(object):
-    """ui for curses sname game
+class SnakeStateRender(object):
+    """game state render under the UI framework
+    """
+    FOOD_CH = "*"
+    SNAKE_CH = "#"
+
+    def __init__(self, ui_framework: 'SnakeUIFramework'):
+        self._ui = ui_framework
+        self._previours_score = None
+        self._previours_tail = None
+
+    def render_init_state(self, game_state):
+        """render initial game state"""
+        # food
+        self._ui.draw_point(game_state.food, self.FOOD_CH)
+        # body
+        for p in game_state.snake:
+            self._ui.draw_point(p, self.SNAKE_CH)
+        # score
+        self._ui.set_score(game_state.score)
+        # record state key information for updating render
+        self._previours_score = game_state.score
+        self._previours_tail = game_state.snake[-1]
+
+    def render_updated_state(self, game_state):
+        """render updated state"""
+        gs = game_state
+        ui = self._ui
+        # draw ui
+        new_head = gs.snake[0]
+        ui.draw_point(new_head, self.SNAKE_CH)
+        new_score = gs.score
+        has_eat_food = new_score > self._previours_score
+        if not has_eat_food:
+            # => food hadn't been eatten => erase tail
+            ui.erase_point(self._previours_tail)
+        else:
+            # => new food(no need to erase previous food), new score
+            ui.draw_point(gs.food, self.FOOD_CH)
+            ui.set_score(new_score)
+        # update key information
+        self._previours_score = new_score
+        self._previours_tail = game_state.snake[-1]
+
+
+class SnakeUIFramework(object):
+    """ui framework for curses sname game
+    a lower api for drawing.
     """
     def __init__(self, width, height):
         self._w = width
@@ -218,7 +223,6 @@ class CursesSnakeGameUI(object):
         """
         self._win.refresh()
         
-
 
 @contextlib.contextmanager
 def keep_time(target_seconds):

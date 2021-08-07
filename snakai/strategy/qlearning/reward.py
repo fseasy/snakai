@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """reward calc
 """
+import logging
 
 from ... import snake_state_machine as ssm
+
+
+logger = logging.getLogger("snakai")
+
 
 class NaiveRewardCalc(object):
     """calculator for reward in naive
@@ -14,6 +19,11 @@ class NaiveRewardCalc(object):
     def __call__(self, game_state: ssm.SnakeStateMachine) -> float:
         """get reward
         """
+        reward = self._calc_reward(game_state)
+        logger.info("reward = %.2f", reward)
+        return reward
+
+    def _calc_reward(self, game_state):
         if game_state.is_fail():
             return -40.
         elif game_state.is_success():
