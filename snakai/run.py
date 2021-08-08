@@ -6,17 +6,17 @@ import argparse
 import logging
 
 from snakai import strategy as strategy_module
-from snakai import curses_game
-
+from snakai.curses_game import exe
+from snakai.util import logger as logger_module
 
 def main():
     """main program
     """
-    logging.basicConfig(level=logging.INFO)
+    logger_module.init_logger("snakai")
     args = _parse_args()
-    game_exe = curses_game.CursesSnakeGameExe(win_width=args.width, win_height=args.height, 
-        speed="slow")
-    strategy = strategy_module.init_strategy(args.strategy, game_exe.curses_ui, game_exe.frame_time)    
+    game_exe = exe.CursesSnakeGameExe(win_width=args.width, win_height=args.height, 
+        speed=args.speed)
+    strategy = strategy_module.init_strategy(args.strategy, args)    
     game_exe.run(strategy)
 
 
@@ -26,6 +26,9 @@ def _parse_args():
         help="which strategy to execute")
     parser.add_argument("--width", default=60, type=int, help="curses window width")
     parser.add_argument("--height", default=20, type=int, help="curses window height")
+    parser.add_argument("--speed", default=exe.GameSpeed.NORMAL.name, choices=exe.GameSpeed.names(), 
+        help="curses game speed")
+    parser.add_argument("--model_path", help="path to model")
     return parser.parse_args()
 
 

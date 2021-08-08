@@ -4,8 +4,10 @@
 import collections
 import argparse
 import logging
+from os import path
 import typing
 import pickle
+import pathlib
 
 import numpy as np
 
@@ -35,8 +37,13 @@ class QLearningStrategy(strategy_base.Strategy):
         """
 
         if is_infer:
-            with open(infer_args.model_path, mode="rb") as mf:
-                self = pickle.load(mf)
+            model_path = infer_args.model_path
+            if not model_path:
+                model_path = pathlib.Path(__file__).absolute().parent / "output/ql_strategy.pickle"
+            with open(model_path, mode="rb") as mf:
+                loaded_obj = pickle.load(mf)
+                self.__dict__.clear()
+                self.__dict__.update(loaded_obj.__dict__)
         else:
             w, h = train_args.win_width, train_args.win_height
             self._state_translator = state_translator.StateTranslator(w, h)
@@ -57,7 +64,7 @@ class QLearningStrategy(strategy_base.Strategy):
             self._cached_cur_state_idx = None
         self._is_infer = is_infer
 
-    def gen_next_action(self, game_state: ssm.SnakeStateMachine) -> strategy_base.Action:
+    def gen_next_action(self, game_state: ssm.SnakeStateMachine, _) -> strategy_base.Action:
         """generating next action according to the game-state
         > will cache the state-id and action. so not thread-safe!
         """

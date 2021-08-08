@@ -13,7 +13,7 @@ from .. import snake_state_machine as ssm
 class RuleBased(base.Strategy):
     """rule based strategy
     """
-    def gen_next_action(self, game_state) -> base.Action:
+    def gen_next_action(self, game_state, _) -> base.Action:
         """gen next action according to current game-state
         """
         valid_dirs = self._get_valid_directions(game_state)
@@ -37,8 +37,8 @@ class RuleBased(base.Strategy):
         """
         # 1. exclude reverse-direction action
         d = game_state.direction
-        opposite_d = ssm.Direction.get_opposite(d)
-        exclude_oppo_dirs = ssm.Direction.get_effective() - {opposite_d,}
+        opposite_d = ssm.DirectionUtil.get_opposite(d)
+        exclude_oppo_dirs = ssm.DirectionUtil.get_effective() - {opposite_d,}
         
         # 2. exclude immediately collision direction
         def _will_collide(point):
@@ -84,7 +84,7 @@ class RuleBased(base.Strategy):
             # when infer score, we ignore the snake body changing after the step
             next_step_point = ssm.gen_next_step_point(head, d)
             # after move 1 step, test which direction would has collision. don't test opposite position.
-            test_dirs = ssm.Direction.get_effective() - {d,}
+            test_dirs = ssm.DirectionUtil.get_effective() - {d,}
             score = 0.
             x, y = next_step_point.x, next_step_point.y
             for direction in test_dirs:

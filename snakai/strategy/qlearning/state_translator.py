@@ -187,6 +187,11 @@ class _DistanceDiscretizer(object):
     def dist2id(self, dist):
         """distance to decretized id
         """
+        # here we make a compatibility for bigger dist.
+        # because we may train in small graph and infer in big graph
+        if dist > self._max_dist:
+            logger.warning("got bigger distance: %d, just set to max-distance [%d] as default", dist, self._max_dist)
+            dist = self._max_dist
         return self._dist2id[dist]
 
     def ids(self):

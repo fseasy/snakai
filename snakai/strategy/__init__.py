@@ -27,15 +27,16 @@ def get_strategy_cls(name):
     return _name2startegy_cls[name]
 
 
-def init_strategy(name, curses_ui, frame_time):
+def init_strategy(name, args):
     """init strategy
     """
     cls = get_strategy_cls(name)
     if name == "manual":
-        return cls(curses_ui, frame_time)
+        return cls()
     elif name == "rule_based":
         return cls()
-        
+    elif name == "qlearning":
+        return cls(is_infer=True, infer_args=args, train_args=None)
     raise ValueError(f"strategy class {name} has not proper initialization")
 
 

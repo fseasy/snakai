@@ -7,6 +7,30 @@ import enum
 from .. import snake_state_machine as ssm
 
 
+class Strategy(object):
+    """strategy base
+    """
+    def gen_next_action(self, _game_state: ssm.SnakeStateMachine, _exe) -> 'Action':
+        """generating next action according to the game-state
+        exe: Game Executor. 
+            we think strategy running not only need the snake game state, and also some Executor Environments.
+            so we pass a Game Executor to this.
+        """
+        raise NotImplementedError("should impl it")
+
+    def update(self, _game_state: ssm.SnakeStateMachine, _exe):
+        """update strategy if needed
+        default is do noting.
+        """
+        return
+
+    def clear4next(self, _game_state: ssm.SnakeStateMachine):
+        """clear inner temporatory state for next running
+        default do noting
+        """
+        return
+
+
 class Action(enum.Enum):
     """strategy action
     """
@@ -45,24 +69,3 @@ class Action(enum.Enum):
         }
         # if no valid, just raise exception
         return _m[self]
-
-
-class Strategy(object):
-    """strategy base
-    """
-    def gen_next_action(self, game_state: ssm.SnakeStateMachine) -> Action:
-        """generating next action according to the game-state
-        """
-        raise NotImplementedError("should impl it")
-
-    def update(self, game_state: ssm.SnakeStateMachine):
-        """update strategy if needed
-        default is do noting.
-        """
-        return
-
-    def clear4next(self, game_state: ssm.SnakeStateMachine):
-        """clear inner temporatory state for next running
-        default do noting
-        """
-        return

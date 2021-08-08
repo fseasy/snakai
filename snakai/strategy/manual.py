@@ -12,23 +12,16 @@ from . import register
 class Manual(base.Strategy):
     """manual strategy: accept keyboard strategy
     """
-    def __init__(self, curses_ui, wait_key_timeout):
-        """
-        Parameters
-        =============
-        curses_ui: CursesSnakeGameUI
-        wait_key_timeout: float
-            seconds to wait for key.
-        """
-        self._ui = curses_ui
-        # curses.window.timeout use millionseconds instead of seconds.
-        self._wait_key_timeout = int(wait_key_timeout * 1000)
-
-    def gen_next_action(self, _):
+    def gen_next_action(self, _, exe):
         """gen next action. 
         here we don't need state.
         """
-        key = self._ui.getch(self._wait_key_timeout)
+        ui = exe.ui
+        frame_seconds = exe.frame_seconds
+
+        key_waiting_timeout_ms = int(frame_seconds * 1000)
+        key = ui.getch(key_waiting_timeout_ms)
+
         _A = base.Action
         if key == 27:
             # ESC
