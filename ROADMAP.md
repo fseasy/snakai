@@ -1,3 +1,16 @@
+# ROADMAP 
+
+## in 2021 H2
+
+- [ ] make a gold `rule-based` strategy. 
+- [ ] make a `A*` based rule strategy and write a blog to tell the `A*`.
+- [ ] optmize the snake food generating part. see [How to produce a random food in a snake game on c?](https://stackoverflow.com/questions/55362879/how-to-produce-a-random-food-in-a-snake-game-on-c). 
+ now we use a random gen, it may be slow along with snake grow.
+- [ ] optimize `QLearning` reward / learning process and survey more.
+- [ ] make a `Deep Q-Learning` strategy.
+
+## history
+
 前段时间在微博上看到有一个用Python写带AI的贪吃蛇项目，一下子激起了兴趣。感觉好久没有做什么有意思的事情了，而且最近深陷C++重构泥潭，长时间处于闭门造车的状态。于是我想自己也来学着人家来写一个啊...代码可能要参考（这样才能学习嘛），语言上想用JS来写。
 
 JavaScript作为最近非常火的语言，很不幸，我已经基本忘光了。当初学的时候就是半半半罐水，这次趁机学学Node + ECMA6，学学新奇的箭头函数...

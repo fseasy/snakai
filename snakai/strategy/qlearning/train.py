@@ -28,7 +28,7 @@ def train_without_ui(args):
     for train_iter in tqdm.tqdm(range(args.total_iter)):
         state.new_state()
         while state.is_state_ok():
-            action = ql_strategy.gen_next_action(state)
+            action = ql_strategy.gen_next_action(state, None)
             direction = action.to_direction()
             state.update_state(direction)
             ql_strategy.update(state)
@@ -57,7 +57,7 @@ def train_with_ui(args):
             state.new_state()
             state_render.render_init_state(state)
             while state.is_state_ok():
-                action = ql_strategy.gen_next_action(state)
+                action = ql_strategy.gen_next_action(state, None)
                 direction = action.to_direction()
                 state.update_state(direction)
                 ql_strategy.update(state)
