@@ -19,6 +19,7 @@ class QTable(object):
         """init q table
         """
         self._table = np.zeros((state_size, action_size), dtype=np.float32)
+        self._debug_table_update_cnt = np.zeros((state_size, action_size), dtype=np.int32)
 
     def get_action_of_max_score(self, state_id: int) -> int:
         """get action with max score of current game-state
@@ -33,3 +34,8 @@ class QTable(object):
     def update_score(self, state_id: int, action_id: int, score: float):
         """update score"""
         self._table[state_id, action_id] = score
+        self._debug_table_update_cnt[state_id, action_id] += 1
+
+    def table_filling_ratio(self):
+        """get table filling ratio"""
+        return np.count_nonzero(self._debug_table_update_cnt) / self._debug_table_update_cnt.size

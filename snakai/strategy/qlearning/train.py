@@ -4,7 +4,10 @@
 """
 import argparse
 import logging
+import pathlib
 import time
+import pickle
+import tqdm
 
 from snakai.strategy.qlearning import strategy
 from snakai import snake_state_machine as ssm
@@ -22,18 +25,21 @@ def train_without_ui(args):
     
     state = ssm.SnakeStateMachine(width=args.win_width, height=args.win_height)
     
-    for train_iter in range(args.total_iter):
+    for train_iter in tqdm.tqdm(range(args.total_iter)):
         state.new_state()
         while state.is_state_ok():
             action = ql_strategy.gen_next_action(state)
             direction = action.to_direction()
             state.update_state(direction)
             ql_strategy.update(state)
-        # state ended, should do last update for the final state
-        ql_strategy.update(state)
         ql_strategy.clear4next(state)
-        logger.info("iter: %s", train_iter)
-        logger.info("state score: %d, steps: %d", state.score, state.steps)
+        if (train_iter + 1) % 500 == 0:
+            logger.info("train iter %d, state score: %d, steps: %d, table-filling ratio: %.2f%%", 
+                train_iter, state.score, state.steps, ql_strategy.table_filling_ratio() * 100)
+    pathlib.Path(args.model_save_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.model_save_path, mode="wb") as outputf:
+        pickle.dump(obj=ql_strategy, file=outputf)
+    print("table filling strategy", ql_strategy._qtable.table_filling_ratio())
 
 
 def train_with_ui(args):
@@ -57,15 +63,18 @@ def train_with_ui(args):
                 ql_strategy.update(state)
                 state_render.render_updated_state(state)
                 ui.refresh()
-                time.sleep(0.05)
-            ql_strategy.update(state)
+                # time.sleep(0.001)
             ql_strategy.clear4next(state)
             logger.info("state score: %d, steps: %d", state.score, state.steps)
-
+    
+    pathlib.Path(args.model_save_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.model_save_path, mode="wb") as outputf:
+        pickle.dump(obj=ql_strategy, file=outputf)
+    print("table filling strategy", ql_strategy._qtable.table_filling_ratio())
 
 def main():
     """main process for train"""
-    logger_module.init_logger(name="snakai")
+    logger_module.init_logger(name="snakai", fpath="/dev/shm/snakai_train_log.log", level=logging.INFO)
     parser = argparse.ArgumentParser(description="train ql learning strategy")
     parser.add_argument("--win_width", type=int, help="window width", default=60)
     parser.add_argument("--win_height", type=int, help="window height", default=20)
@@ -73,11 +82,12 @@ def main():
     parser.add_argument("--discount", type=float, help="discount", default=0.9)
     parser.add_argument("--init_exploration_rate", type=float, 
         help="initial exporation rate", default=0.5)
-    parser.add_argument("--exploration_decay_iterations", "-edi", type=int, 
+    parser.add_argument("--exploration_decay_iter", "-edi", type=int, 
         help="how many iterations after exploration decay to zero", default=20)
     parser.add_argument("--seed", type=int, help="random seed", default=1234)
     parser.add_argument("--total_iter", "-ti", type=int, help="training iterations", default=20)
     parser.add_argument("--without_ui", action="store_true", help="whether diable ui")
+    parser.add_argument("--model_save_path", "-o", help="where to save model", required=True)
     args = parser.parse_args()
 
     if args.without_ui:

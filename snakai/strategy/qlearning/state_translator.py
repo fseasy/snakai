@@ -40,7 +40,7 @@ class StateTranslator(object):
         inner_state = self._game_state2inner_state(game_state)
         return self._inner_state2id[inner_state]
 
-    def id2inner_state(self, state_id) -> 'QStateTranslator._InnerState':
+    def id2inner_state(self, state_id) -> 'StateTranslator._InnerState':
         """index to inner state (can't translated to original state)"""
         return self._id2inner_state[state_id]
 
@@ -48,6 +48,29 @@ class StateTranslator(object):
         """get size
         """
         return len(self._inner_state2id)
+
+    def __getstate__(self):
+        """for pickle
+        """
+        state = {
+            "_x_encoder": self._x_encoder,
+            "_y_encoder": self._y_encoder
+        }
+
+        state_id_value_pairs = [(_s._asdict(), _id) for (_s, _id) in self._inner_state2id.items()]
+        state["state_id_pairs"] = state_id_value_pairs
+        return state
+
+    def __setstate__(self, state):
+        """for pickle"""
+        state2id = {}
+        id2state = {}
+        for (s_dict, s_id) in state["state_id_pairs"]:
+            inner_state = self._InnerState(**s_dict)
+            state2id[inner_state] = s_id
+            id2state[s_id] = inner_state
+        del state["state_id_pairs"]
+        self.__dict__.update(**state, _inner_state2id=state2id, _id2inner_state=id2state)
 
     def _build_state2id(self):
         """
@@ -116,7 +139,7 @@ class StateTranslator(object):
                 current_state.pop()
 
         _recursive_build_state([], 0)
-        logger.info("build QStateTranslater, full state size = %d", len(_state2idx))
+        logger.debug("build QStateTranslater, full state size = %d", len(_state2idx))
         return _state2idx
 
     def _game_state2inner_state(self, game_state: ssm.SnakeStateMachine):
@@ -135,6 +158,9 @@ class StateTranslator(object):
         left_dist = distance_calc.barrier_left_dist()
         right_dist = distance_calc.barrier_right_dist()
         (food_x_with_sign, food_y_with_sign) = distance_calc.food_dist_with_sign()
+
+        # logger.debug("state = %s, up %d, down %d, left %d, right %d", game_state, 
+        #     up_dist, down_dist, left_dist, right_dist)
 
         return self._InnerState(
             barrier_up=self._y_encoder.dist2id(up_dist),

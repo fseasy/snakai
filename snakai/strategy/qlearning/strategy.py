@@ -3,6 +3,7 @@
 """
 import collections
 import argparse
+import logging
 import typing
 import pickle
 
@@ -16,6 +17,8 @@ from .. import base as strategy_base
 from .. import register
 from ... import snake_state_machine as ssm
 
+
+logger = logging.getLogger("snakai")
 
 @register("qlearning")
 class QLearningStrategy(strategy_base.Strategy):
@@ -45,7 +48,7 @@ class QLearningStrategy(strategy_base.Strategy):
             self._discount = train_args.discount
             # probability of do exploration
             self._exploration_rate = train_args.init_exploration_rate
-            _decay_iter = train_args.exploration_decay_iterations
+            _decay_iter = train_args.exploration_decay_iter
             self._exploration_decay_delta = self._exploration_rate / _decay_iter
             self._rng = np.random.RandomState(train_args.seed)
             self._reward_calc = reward_module.NaiveRewardCalc()
@@ -64,16 +67,22 @@ class QLearningStrategy(strategy_base.Strategy):
             state_id = self._cached_cur_state_idx
         else:
             state_id = self._state_translator.state2id(game_state)
+        
         if not self._is_infer and self._rng.rand() < self._exploration_rate:
             # exploration => make a random (but valid) action
             action = self._gen_random_action(game_state.direction)
+            action_src = "random"
         else:
             action = self._gen_greedy_action(state_id)
-        
+            action_src = "greedy"
+
         action_id = self._action_translator.action2id(action)
         episode = self._Episode(state_id=state_id, action_id=action_id)
         self._pre_episode = episode
-        
+
+        logger.debug("cur state: %s, %s action: %s", _state_id2shorter_str(state_id, self._state_translator), 
+            action_src, action)
+
         return action
     
     def update(self, game_state: ssm.SnakeStateMachine):
@@ -83,7 +92,7 @@ class QLearningStrategy(strategy_base.Strategy):
         game_state: here should be the new game state, that is
             After taken the previous predicted action.
         """
-        reward = self._reward_calc(game_state)
+        reward = self._reward_calc.calc(game_state)
         if game_state.is_state_ok():
             # game still running
             new_state_idx = self._state_translator.state2id(game_state)
@@ -98,6 +107,8 @@ class QLearningStrategy(strategy_base.Strategy):
         q_predict = self._qtable.get_score(**self._pre_episode._asdict())
         new_score = q_predict + self._learning_rate * (q_target - q_predict)
         self._qtable.update_score(**self._pre_episode._asdict(), score=new_score)
+        logger.debug("after action, reward=%.2f, state new-score = %.2f, table filling ratio: %.1f%%", 
+            reward, new_score, self._qtable.table_filling_ratio() * 100)
         self._cached_cur_state_idx = new_state_idx
 
     def clear4next(self, _):
@@ -106,8 +117,13 @@ class QLearningStrategy(strategy_base.Strategy):
         """
         self._pre_episode = None
         self._cached_cur_state_idx = None
+        self._reward_calc.clear4next()
         if self._exploration_rate > 0:
             self._exploration_rate -= self._exploration_decay_delta
+
+    def table_filling_ratio(self):
+        """get table filling ratio"""
+        return self._qtable.table_filling_ratio()
 
     def _gen_random_action(self, cur_diction: ssm.Direction) -> strategy_base.Action:
         opposite_d = ssm.DirectionUtil.get_opposite(cur_diction)
@@ -122,3 +138,9 @@ class QLearningStrategy(strategy_base.Strategy):
         action = self._action_translator.id2action(action_idx)
         return action
 
+
+def _state_id2shorter_str(state_id, state_translator):
+    inner_state = state_translator.id2inner_state(state_id)
+    state_str = ("barrier[up:{s.barrier_up}, down:{s.barrier_down}, left:{s.barrier_left}, right:{s.barrier_right}]"
+        "food[x:{s.food_x}, y:{s.food_y}]").format(s=inner_state)
+    return state_str

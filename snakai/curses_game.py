@@ -159,19 +159,27 @@ class SnakeUIFramework(object):
     def active_env(self):
         """curses need init and properly exit
         """
-        stdcsr = curses.initscr()
-        stdcsr.keypad(1)
-        curses.noecho()
-        curses.curs_set(0)
+        stdscr = curses.initscr()
         try:
-            yield stdcsr
+            stdscr.keypad(True)
+            curses.noecho()
+            curses.cbreak()
+            # disable cursor display
+            curses.curs_set(0)
+
+            curses.start_color()
+            curses.use_default_colors()
+            curses.init_pair(1, curses.COLOR_YELLOW, -1)
+            curses.init_pair(2, curses.COLOR_CYAN, -1)
+
+            yield stdscr
         except:
             raise
         finally:
             # release, or it will break the terminal
-            stdcsr.keypad(0)
-            curses.echo()
+            stdscr.keypad(False)
             curses.nocbreak()
+            curses.echo()
             curses.endwin()
 
     def init_window(self):
@@ -179,15 +187,16 @@ class SnakeUIFramework(object):
         """
         # both height, width has extra border line. so following point should also has 1 offset
         win = curses.newwin(self._h + 2, self._w + 2, 0, 0)
-        # bind the win
+
+        win.keypad(True)
+        # explicitly set the border char (Ubuntu Gnome ternimal may render `wide-char` for default h value)
+        win.box("|", "|")
+        win.nodelay(True)
+
+        # bind the win and render others
         self._win = win
-
-        win.keypad(1)
-        win.border(0)
-        win.nodelay(1)
-        win.addstr(0, 27, ' SNAKE ')
-
         self.set_score(0)
+        self.set_title("SNAKAI")
 
     def getch(self, timeout):
         """get char from standard input
@@ -198,7 +207,13 @@ class SnakeUIFramework(object):
     def set_score(self, score):
         """update snake game score
         """
-        self._win.addstr(0, 2, f'Score : {score} ')
+        self._win.addstr(0, 2, f'Score: {score} ', curses.color_pair(2))
+
+    def set_title(self, title):
+        """set title"""
+        tlen = len(title)
+        left_pad = (self._w - tlen) // 2
+        self._win.addstr(0, left_pad, title, curses.color_pair(1))
     
     def draw_point(self, point, c):
         """draw character `c` in point

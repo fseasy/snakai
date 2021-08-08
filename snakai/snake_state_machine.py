@@ -150,7 +150,8 @@ class SnakeStateMachine(object):
         SNAKE_LENGTH = 3
         
         def _random_snake_head():
-            """init a snake
+            """init a snake.
+            left space for snake body
             """
             head_x = self._rng.randrange(SNAKE_LENGTH + 1, self._w - SNAKE_LENGTH - 1)
             head_y = self._rng.randrange(SNAKE_LENGTH + 1, self._h - SNAKE_LENGTH - 1)
@@ -167,14 +168,15 @@ class SnakeStateMachine(object):
                 return Point(x, y)
 
         def _get_direction(snake_head, food):
-            # snake is has left & right direction
+            # in init, we let snake only has left & right direction
             # should head for the food in the initialization.
             return Direction.RIGHT if snake_head.x <= food.x else Direction.LEFT
         
         def _init_snake(snake_head, direction):
+            # in init, only left/right direction
             tail_x_offset = -1 if direction == Direction.RIGHT else 1
             snake = collections.deque([snake_head])
-            for i in range(SNAKE_LENGTH - 1):
+            for i in range(1, SNAKE_LENGTH):
                 tail = Point(snake_head.x + tail_x_offset * i, snake_head.y)
                 snake.append(tail)
             return snake
@@ -224,6 +226,9 @@ class SnakeStateMachine(object):
     def head(self):
         """head"""
         return self.snake[0]
+
+    def __str__(self):
+        return f"food={self.food}, snake={self.snake}, step={self.steps}, score={self.score}"
 
 
 def gen_next_step_point(p: Point, direction: Direction) -> Point:

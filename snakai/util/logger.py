@@ -5,11 +5,11 @@ import logging
 import pathlib
 
 
-def init_logger(name, level=logging.INFO):
+def init_logger(name, level=logging.INFO, fpath="log/running.log"):
     """init logger
     """
     # just use the relative dir for easily check log file
-    path = pathlib.Path("log/running.log")
+    path = pathlib.Path(fpath)
     path.parent.mkdir(exist_ok=True, parents=True)
     
     handler = logging.FileHandler(filename=path, mode="w", encoding="utf-8")
