@@ -87,8 +87,10 @@ class QLearningStrategy(strategy_base.Strategy):
         episode = self._Episode(state_id=state_id, action_id=action_id)
         self._pre_episode = episode
 
-        logger.debug("cur state: %s, %s action: %s", _state_id2shorter_str(state_id, self._state_translator), 
-            action_src, action)
+        if logger.level <= logging.DEBUG:
+            # only calc when debug.            
+            logger.debug("cur state: %s, %s action: %s", _state_id2shorter_str(state_id, self._state_translator), 
+                action_src, action)
 
         return action
     
@@ -114,8 +116,10 @@ class QLearningStrategy(strategy_base.Strategy):
         q_predict = self._qtable.get_score(**self._pre_episode._asdict())
         new_score = q_predict + self._learning_rate * (q_target - q_predict)
         self._qtable.update_score(**self._pre_episode._asdict(), score=new_score)
-        logger.debug("after action, reward=%.2f, state new-score = %.2f, table filling ratio: %.1f%%", 
-            reward, new_score, self._qtable.table_filling_ratio() * 100)
+        if logger.level <= logging.DEBUG:
+            # only calc in logging.DEBUG. or it will cost many time.
+            logger.debug("after action, reward=%.2f, state new-score = %.2f, table filling ratio: %.1f%%", 
+                reward, new_score, self._qtable.table_filling_ratio() * 100)
         self._cached_cur_state_idx = new_state_idx
 
     def clear4next(self, _):
