@@ -21,7 +21,7 @@ class DistanceCalc(object):
         head = self._s.head
         x_axis_points = self._key_points["x_axis_same2head"] 
         if not x_axis_points:
-            # body all not in 1 axis, should calc to edge
+            # body all not in same x-axis, should calc to edge
             return head.y - 0
         up_points = [p for p in x_axis_points if p.y <= head.y]
         if not up_points:
