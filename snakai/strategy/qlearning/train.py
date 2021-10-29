@@ -5,13 +5,12 @@
 import argparse
 import logging
 import pathlib
-import time
 import pickle
 import tqdm
 
 from snakai.strategy.qlearning import strategy
 from snakai import snake_state_machine as ssm
-from snakai import curses_game
+from snakai.curses_game import ui as ui_module
 from snakai.util import logger as logger_module
 
 
@@ -47,8 +46,8 @@ def train_with_ui(args):
     """
     ql_strategy = strategy.QLearningStrategy(is_infer=False, train_args=args, infer_args=None)
     state = ssm.SnakeStateMachine(width=args.win_width, height=args.win_height)
-    ui = curses_game.SnakeUIFramework(width=args.win_width, height=args.win_height)
-    state_render = curses_game.SnakeStateRender(ui)
+    ui = ui_module.SnakeUIFramework(width=args.win_width, height=args.win_height)
+    state_render = ui_module.SnakeStateRender(ui)
 
     for train_iter in range(args.total_iter):
         logger.info("iter: %s", train_iter)
@@ -74,7 +73,7 @@ def train_with_ui(args):
 
 def main():
     """main process for train"""
-    logger_module.init_logger(name="snakai", fpath="/dev/shm/snakai_train_log.log", level=logging.INFO)
+    logger_module.init_logger(name="snakai", fpath="/dev/shm/snakai_train_log.log", level=logging.DEBUG)
     parser = argparse.ArgumentParser(description="train ql learning strategy")
     parser.add_argument("--win_width", type=int, help="window width", default=60)
     parser.add_argument("--win_height", type=int, help="window height", default=20)

@@ -4,16 +4,15 @@
 import collections
 import argparse
 import logging
-from os import path
 import typing
 import pickle
 import pathlib
 
 import numpy as np
 
+from . import action_encoder
+from . import state_encoder
 from . import qtable as qtable_module
-from . import state_translator
-from . import action_translator
 from . import reward as reward_module
 from .. import base as strategy_base
 from .. import register
@@ -45,11 +44,10 @@ class QLearningStrategy(strategy_base.Strategy):
                 self.__dict__.clear()
                 self.__dict__.update(loaded_obj.__dict__)
         else:
-            w, h = train_args.win_width, train_args.win_height
-            self._state_translator = state_translator.StateTranslator(w, h)
-            self._action_translator = action_translator.ActionTranslator()
-            self._qtable = qtable_module.QTable(state_size=self._state_translator.size(),
-                action_size=self._action_translator.size())
+            self._state_encoder = state_encoder.StateEncoder()
+            self._action_encoder = action_encoder.ActionEncoder()
+            self._qtable = qtable_module.QTable(state_size=self._state_encoder.size,
+                action_size=self._action_encoder.size)
 
             self._learning_rate = train_args.learning_rate
             self._discount = train_args.discount
@@ -73,7 +71,7 @@ class QLearningStrategy(strategy_base.Strategy):
             # when updating, it will cache the state-idx to avoid re-calc here.
             state_id = self._cached_cur_state_idx
         else:
-            state_id = self._state_translator.state2id(game_state)
+            state_id = self._state_encoder.encode(game_state)
         
         if not self._is_infer and self._rng.rand() < self._exploration_rate:
             # exploration => make a random (but valid) action
@@ -83,14 +81,14 @@ class QLearningStrategy(strategy_base.Strategy):
             action = self._gen_greedy_action(state_id)
             action_src = "greedy"
 
-        action_id = self._action_translator.action2id(action)
+        action_id = self._action_encoder.encode(action)
         episode = self._Episode(state_id=state_id, action_id=action_id)
         self._pre_episode = episode
 
         if logger.level <= logging.DEBUG:
             # only calc when debug.            
-            logger.debug("cur state: %s, %s action: %s", _state_id2shorter_str(state_id, self._state_translator), 
-                action_src, action)
+            logger.debug("cur state: %s, %s action: %s", 
+                _state_id2shorter_str(state_id, self._state_encoder), action_src, action)
 
         return action
     
@@ -104,7 +102,7 @@ class QLearningStrategy(strategy_base.Strategy):
         reward = self._reward_calc.calc(game_state)
         if game_state.is_state_ok():
             # game still running
-            new_state_idx = self._state_translator.state2id(game_state)
+            new_state_idx = self._state_encoder.encode(game_state)
 
             action_id = self._qtable.get_action_of_max_score(new_state_idx)
             max_score = self._qtable.get_score(new_state_idx, action_id)
@@ -139,19 +137,20 @@ class QLearningStrategy(strategy_base.Strategy):
     def _gen_random_action(self, cur_diction: ssm.Direction) -> strategy_base.Action:
         opposite_d = ssm.DirectionUtil.get_opposite(cur_diction)
         opposite_action = strategy_base.Action.effective_direction2action(opposite_d)
-        candidate_action = list(set(self._action_translator.actions()) - {opposite_action,})
+        candidate_action = list(set(self._action_encoder.actions) - {opposite_action,})
         return self._rng.choice(candidate_action)
 
     def _gen_greedy_action(self, state_idx: int) -> strategy_base.Action:
         """do exploitation according to QTable
         """
         action_idx = self._qtable.get_action_of_max_score(state_idx)
-        action = self._action_translator.id2action(action_idx)
+        action = self._action_encoder.decode(action_idx)
         return action
 
 
-def _state_id2shorter_str(state_id, state_translator):
-    inner_state = state_translator.id2inner_state(state_id)
-    state_str = ("barrier[up:{s.barrier_up}, down:{s.barrier_down}, left:{s.barrier_left}, right:{s.barrier_right}]"
-        "food[x:{s.food_x}, y:{s.food_y}]").format(s=inner_state)
+def _state_id2shorter_str(state_id, state_encoder):
+    s = state_encoder.readable_state(state_id)
+    s = list(s)
+    state_str = (f"barrier[up:{s[0]}, down:{s[1]}, left:{s[2]}, right:{s[3]}]"
+        f"food[x:{s[4]}, y:{s[5]}] d:{s[6]}")
     return state_str

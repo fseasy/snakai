@@ -41,5 +41,5 @@ class NaiveRewardCalc(object):
             self._step_after_last_gain += 1
             _ref_len = game_state.state_width + game_state.state_height
             times = self._step_after_last_gain // _ref_len
-            reward = - 1 / 1000 * (10 ** times)
+            reward = - 1 / 1000 * min(times, 100000)
             return reward
