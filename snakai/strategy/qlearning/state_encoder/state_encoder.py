@@ -22,7 +22,10 @@ class StateEncoder(EncoderBase):
     from a game-state to QLearning state (index represented)
     """
     def __init__(self):
-        self._encoders = [DistEncoder(), DirectionEncoder(), IsRepeatEncoder()]
+        self._encoders = [
+            DistEncoder(), 
+            # DirectionEncoder(), 
+            IsRepeatEncoder()]
         self._id2state = common.build_all_states(self._encoders)
         self._state2id = {_s: _i for (_i, _s) in enumerate(self._id2state)}
 

@@ -36,6 +36,11 @@ class QTable(object):
         self._table[state_id, action_id] = score
         self._debug_table_update_cnt[state_id, action_id] += 1
 
-    def table_filling_ratio(self):
+    def table_filling_ratio(self, return_detail=False):
         """get table filling ratio"""
-        return np.count_nonzero(self._debug_table_update_cnt) / self._debug_table_update_cnt.size
+        filled_cnt = np.count_nonzero(self._debug_table_update_cnt)
+        ratio =  filled_cnt / self._debug_table_update_cnt.size
+        if return_detail:
+            return (ratio, filled_cnt, self._debug_table_update_cnt.size)
+        else:
+            return ratio

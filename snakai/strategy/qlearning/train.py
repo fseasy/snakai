@@ -38,7 +38,8 @@ def train_without_ui(args):
     pathlib.Path(args.model_save_path).parent.mkdir(parents=True, exist_ok=True)
     with open(args.model_save_path, mode="wb") as outputf:
         pickle.dump(obj=ql_strategy, file=outputf)
-    print("table filling strategy", ql_strategy._qtable.table_filling_ratio())
+    (_ratio, _fill_cnt, _state_cnt) = ql_strategy._qtable.table_filling_ratio(return_detail=True)
+    print(f"table filling ratio: {_ratio:.2%}({_fill_cnt}/{_state_cnt})")
 
 
 def train_with_ui(args):
@@ -69,7 +70,8 @@ def train_with_ui(args):
     pathlib.Path(args.model_save_path).parent.mkdir(parents=True, exist_ok=True)
     with open(args.model_save_path, mode="wb") as outputf:
         pickle.dump(obj=ql_strategy, file=outputf)
-    print("table filling strategy", ql_strategy._qtable.table_filling_ratio())
+    (_ratio, _fill_cnt, _state_cnt) = ql_strategy._qtable.table_filling_ratio(return_detail=True)
+    print(f"table filling ratio: {_ratio:.2%}({_fill_cnt}/{_state_cnt})")
 
 def main():
     """main process for train"""

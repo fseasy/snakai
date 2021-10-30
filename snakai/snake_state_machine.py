@@ -2,10 +2,12 @@
 """snake game state definitions
 """
 import enum
+import logging
 import collections
 import itertools
-import logging
 import random
+
+logger = logging.getLogger("snakai")
 
 
 class Direction(enum.IntEnum):
@@ -37,6 +39,10 @@ class SnakeStateMachine(object):
     what's more, some extra elements is used for game:
     1. score: game score, currently equals to the food eaten
     2. steps: move steps. each update on not-ended state should increase the steps.
+    3. remaining-steps: max remaining steps before game-over. 
+        if food not eaten while remaining-steps == 0, then game over.
+        else if food has been eaten, the remaining steps will be refilled.
+        This is used to avoid `circle` operations.
     """
     class InnerStatus(object):
         """inner status"""
@@ -55,9 +61,11 @@ class SnakeStateMachine(object):
         self.direction = Direction.NONE
         # type: int
         self.steps = None
+        # type: fint
+        self.remaining_steps = None
         # type: float
         self.score = None
-        
+                
         self._w = width
         self._h = height
         self._status = self.InnerStatus.UN_INIT
@@ -102,6 +110,9 @@ class SnakeStateMachine(object):
                     return True
             return False
         
+        def _is_exceed_max_steps():
+            return self.remaining_steps <= 0
+
         def _has_eaten_food():
             new_head = self.head
             return new_head == self.food
@@ -126,15 +137,18 @@ class SnakeStateMachine(object):
             return False
 
         self.steps += 1
+        self.remaining_steps -= 1
         _udpate_direction()
         
         _add_snake_head()
-        if _is_new_head_collide():
+        if _is_new_head_collide() or _is_exceed_max_steps():
             self._status = self.InnerStatus.FAIL
             return False
 
         if _has_eaten_food():
+            logger.debug("eat food! score = %s", self.score)
             self.score += 1
+            self.remaining_steps = _calc_max_remaining_steps(self)
             if _has_succeeded():
                 self._status = self.InnerStatus.SUCCESS
                 return False
@@ -191,6 +205,7 @@ class SnakeStateMachine(object):
         self.direction = direction
         self.score = 0
         self.steps = 0
+        self.remaining_steps = _calc_max_remaining_steps(self)
         self._status = self.InnerStatus.RUNNING
 
     def is_success(self):
@@ -293,3 +308,18 @@ class DirectionUtil(object):
         """whether d is a effective direction
         """
         return d in cls.get_effective()
+
+
+def _calc_max_remaining_steps(game_state: SnakeStateMachine):
+    """Calc max remaing steps. 
+    currently we naively impl it:
+        1. if only 1 node, go to food, need max `Width + Height`
+        2. for a snake line, the head need to bypass the body, most at `snake-body`
+        3. duplicated operations, at most 1.2 -> 2 times (when body short, duplicated op should be less)
+    """
+    _dist_base = game_state.state_width + game_state.state_height
+    _body_len_base = len(game_state.snake)
+    _multiplier =  1.2 + 0.8 * (_body_len_base / (game_state.state_width * game_state.state_height))
+    _max_val = (_dist_base + _body_len_base) * _multiplier
+    _max_val = int(_max_val)
+    return _max_val

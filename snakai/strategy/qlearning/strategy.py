@@ -89,7 +89,7 @@ class QLearningStrategy(strategy_base.Strategy):
 
         if logger.level <= logging.DEBUG:
             # only calc when debug.            
-            logger.debug("cur state: %s, %s action: %s", 
+            logger.debug("cur state: %s, [%s] action: %s", 
                 _state_id2shorter_str(state_id, self._state_encoder), action_src, action)
 
         return action
@@ -154,6 +154,8 @@ class QLearningStrategy(strategy_base.Strategy):
 def _state_id2shorter_str(state_id, state_encoder):
     s = state_encoder.readable_state(state_id)
     s = list(s)
+    # state_str = (f"barrier[up:{s[0]},down:{s[1]},left:{s[2]},right:{s[3]}] "
+    #     f"food[x:{s[4]},y:{s[5]}] d:{s[6]} r:{s[7]}")
     state_str = (f"barrier[up:{s[0]},down:{s[1]},left:{s[2]},right:{s[3]}] "
-        f"food[x:{s[4]},y:{s[5]}] d:{s[6]} r:{s[7]}")
+        f"food[x:{s[4]},y:{s[5]}] r:{s[6]}")
     return state_str

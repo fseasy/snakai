@@ -14,7 +14,6 @@ class NaiveRewardCalc(object):
     """
     def __init__(self):
         self._env_prev_score = 0.
-        self._step_after_last_gain = 0
 
     def calc(self, game_state: ssm.SnakeStateMachine) -> float:
         """get reward
@@ -25,21 +24,18 @@ class NaiveRewardCalc(object):
     def clear4next(self):
         """clear inner state for next updating"""
         self._env_prev_score = 0.
-        self._step_after_last_gain = 0
 
     def _calc_reward(self, game_state):
         if game_state.is_fail():
-            return -50.
+            if game_state.remaining_steps <= 0:
+                return -1.
+            else:
+                return -5.
         elif game_state.is_success():
             return 100.
         env_score = game_state.score
         if env_score > self._env_prev_score:
             self._env_prev_score = env_score
-            self._step_after_last_gain = 0
-            return 50.
+            return 1. * env_score
         else:
-            self._step_after_last_gain += 1
-            _ref_len = game_state.state_width + game_state.state_height
-            times = self._step_after_last_gain // _ref_len
-            reward = - 1 / 1000 * min(times, 100000)
-            return reward
+            return 0.
