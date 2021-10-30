@@ -5,7 +5,9 @@ dist -> state enum
 
 import bisect
 
-class BarrierDistUnitEncoder(object):
+from .encoder_base import EncoderBase
+
+class BarrierDistUnitEncoder(EncoderBase):
     """barrier dist encoder"""
     def __init__(self):
         self._dist_upperbound = [0, 1]

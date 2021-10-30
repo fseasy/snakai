@@ -2,9 +2,11 @@
 """direction encoder
 """
 
+from .encoder_base import EncoderBase
 from snakai.snake_state_machine import Direction as D
 
-class DirectionEncoder(object):
+
+class DirectionEncoder(EncoderBase):
     """direction encoder.
     direct use the snake direction
     """

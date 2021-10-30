@@ -73,7 +73,6 @@ def train_with_ui(args):
 
 def main():
     """main process for train"""
-    logger_module.init_logger(name="snakai", fpath="/dev/shm/snakai_train_log.log", level=logging.DEBUG)
     parser = argparse.ArgumentParser(description="train ql learning strategy")
     parser.add_argument("--win_width", type=int, help="window width", default=60)
     parser.add_argument("--win_height", type=int, help="window height", default=20)
@@ -87,7 +86,10 @@ def main():
     parser.add_argument("--total_iter", "-ti", type=int, help="training iterations", default=20)
     parser.add_argument("--without_ui", action="store_true", help="whether diable ui")
     parser.add_argument("--model_save_path", "-o", help="where to save model", required=True)
+    parser.add_argument("--log_level", help="log level", choices=["warning", "info", "debug"], default="debug")
     args = parser.parse_args()
+
+    logger_module.init_logger(name="snakai", fpath="/dev/shm/snakai_train_log.log", level=args.log_level.upper())
 
     if args.without_ui:
         train_without_ui(args)

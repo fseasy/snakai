@@ -43,6 +43,8 @@ class QLearningStrategy(strategy_base.Strategy):
                 loaded_obj = pickle.load(mf)
                 self.__dict__.clear()
                 self.__dict__.update(loaded_obj.__dict__)
+            # clear training state to avoid affect infer
+            self.clear4next(None)
         else:
             self._state_encoder = state_encoder.StateEncoder()
             self._action_encoder = action_encoder.ActionEncoder()
@@ -129,6 +131,7 @@ class QLearningStrategy(strategy_base.Strategy):
         self._reward_calc.clear4next()
         if self._exploration_rate > 0:
             self._exploration_rate -= self._exploration_decay_delta
+        self._state_encoder.clear()
 
     def table_filling_ratio(self):
         """get table filling ratio"""
@@ -151,6 +154,6 @@ class QLearningStrategy(strategy_base.Strategy):
 def _state_id2shorter_str(state_id, state_encoder):
     s = state_encoder.readable_state(state_id)
     s = list(s)
-    state_str = (f"barrier[up:{s[0]}, down:{s[1]}, left:{s[2]}, right:{s[3]}]"
-        f"food[x:{s[4]}, y:{s[5]}] d:{s[6]}")
+    state_str = (f"barrier[up:{s[0]},down:{s[1]},left:{s[2]},right:{s[3]}] "
+        f"food[x:{s[4]},y:{s[5]}] d:{s[6]} r:{s[7]}")
     return state_str

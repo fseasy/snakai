@@ -12,7 +12,7 @@ from snakai.util import logger as logger_module
 def main():
     """main program
     """
-    logger_module.init_logger("snakai")
+    logger_module.init_logger("snakai", level=logging.DEBUG, fpath="/dev/shm/snake_run.log")
     args = _parse_args()
     game_exe = exe.CursesSnakeGameExe(win_width=args.width, win_height=args.height, 
         speed=args.speed)

@@ -4,6 +4,7 @@
 import logging
 
 from . import common
+from .encoder_base import EncoderBase
 from .barrier_dist_unit_encoder import BarrierDistUnitEncoder
 from .food_dist_unit_encoder import FoodDistUnitEncoder
 from snakai import snake_state_machine as ssm
@@ -12,7 +13,7 @@ from snakai import snake_state_machine_util as ssm_util
 logger = logging.getLogger("snakai")
 
 
-class DistEncoder(object):
+class DistEncoder(EncoderBase):
     """dist encoder"""
     def __init__(self):
         self._unit_encoders = [
