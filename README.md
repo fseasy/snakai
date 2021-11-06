@@ -2,6 +2,10 @@
 
 ![Upload Python Package](https://github.com/fseasy/snakai/workflows/Upload%20Python%20Package/badge.svg)
 
+**暂时停止**
+
+反思了下，这个项目，应用层面没有创新、技术上也没啥创新，毫无意义。兴趣索然，为了坚持而坚持。索性暂时放弃了。
+
 snake is running! our project final goal is to build a snake game driven by Reinforcement Learning.
 
 贪吃蛇出动！远期目标是实现强化学习驱动的贪吃蛇游戏。
